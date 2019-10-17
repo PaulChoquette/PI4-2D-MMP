@@ -27,22 +27,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main_1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main_2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="primitive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="roe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="__macosx\v_read&amp;connect\._file.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="__macosx\v_read&amp;connect\._main_2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -11,6 +11,11 @@ int ** connect::init(int **inpoel,int **lpofa,int **lnofa, string choix)
     int ipoil;
     int **esup2 = mat.generateMatrix(npoin+1, 1);
     int **esup2_test = mat.generateMatrix(npoin+1, 1); 
+	for (int ipoin = 0; ipoin < npoin+1; ipoin++)
+	{
+		*(int*)esup2[ipoin] = 0;
+		*(int*)esup2_test[ipoin] = 0;
+	}
     for (int ielem=0;  ielem < nelem; ielem++)
     {
         for (int inode = 0; inode < nnode; inode++ )
@@ -122,6 +127,13 @@ int ** connect::init(int **inpoel,int **lpofa,int **lnofa, string choix)
     int **rpoin = mat.generateMatrix(npoin, 1); 
 
     int **esuel = mat.generateMatrix(nelem, nfael); 
+	for (int ielem = 0; ielem < nelem; ielem++)
+	{
+		for (int ifael = 0; ifael < nfael; ifael++)
+		{
+			esuel[ielem][ifael] = 0;
+		}
+	}
 
     int nnofa, ifael, jelem,nnofj,jfael, jnofa, icoun, inofa, ypoin;
     int **lhelp = mat.generateMatrix(poinperFace,1); 
@@ -298,7 +310,7 @@ int ** connect::Elem2Node(int **elem2face,int **face2node)
         //cout << " ....... ";cout << "\n";
         for(int k = 0; k < NbNdPerElem; k++)
         {
-            if (Elem2Node[i][k] == face2node[elem2face[i][k] - 1][0] or k == 0)
+            if (Elem2Node[i][k] == face2node[elem2face[i][k] - 1][0] || k == 0)
             {
                 Elem2Node[i][k] = face2node[elem2face[i][k] - 1][0];
                 if (k<NbNdPerElem-1)

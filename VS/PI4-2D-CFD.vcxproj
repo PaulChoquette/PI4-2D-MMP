@@ -102,12 +102,8 @@
     <ClCompile Include="file.cpp" />
     <ClCompile Include="function.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="main_1.cpp" />
-    <ClCompile Include="main_2.cpp" />
     <ClCompile Include="primitive.cpp" />
     <ClCompile Include="roe.cpp" />
-    <ClCompile Include="__macosx\v_read&amp;connect\._file.cpp" />
-    <ClCompile Include="__macosx\v_read&amp;connect\._main_2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />

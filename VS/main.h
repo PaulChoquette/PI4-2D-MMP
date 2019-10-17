@@ -58,6 +58,7 @@ class Reader {
 		int nnode; // Nbre noeud par element
 		int **inpoel1;
 		double **coord;
+		int** vtk;
 		unsigned elem, poin;
 		int lineNelem;
 		int poinlinen;
@@ -66,13 +67,10 @@ class Reader {
 		bool IsDefined(int numb);
 
 		unsigned Readndime(const string& line);
-
 		unsigned Readnelem(const string& line);
-		unsigned** AlloE2P(unsigned**& elem2poin, unsigned ndime, unsigned nelem);
-		void FillE2P(const char* cline);
+		void FillE2P_VTK(const char* cline);
 
 		unsigned Readnpoin(const string& line);
-		long double** AlloCoord(long double**& oldcoord, unsigned ndime, unsigned npoin);
 		double ** FillCoord(const char* cline);
 
 
@@ -88,13 +86,15 @@ class connect
         int FaceNumber;
         int NbNdPerFace;
         int NbNdPerElem;
-        int NbFacePerELEM;
         int ddl;
+		int** vtk;
         // Pointeur
         
 
         // Methods 
-        int ** init(int **inpoel,int **lpofa,int **lnofa, string choix);
+        int ** init(int **inpoel, string choix);
+		int ** Get_lpofa(int** vtk, int ielem);
+		int ** Get_lnofa(int** vtk, int ielem);
         int ** Face2Vec(int **elem2face, int **face2node, double **coord);
         int ** Elem2Node(int **elem2face,int **face2node);
         double ** Elem2Vec_x(int **Elem2Node,double **coord);

@@ -51,6 +51,7 @@ void Reader::read_1(string File_Name)
 	///////////////////
 					lineNelem = linen;
 					inpoel1 = matrix.generateMatrix(nelem, nnode); 
+					vtk = matrix.generateMatrix(nelem,1);
 					//matrix.printMatrix(inpoel1, nelem,nnode);
 					continue;
 				}
@@ -60,7 +61,7 @@ void Reader::read_1(string File_Name)
 			{
 				if (linen > lineNelem && linen <= lineNelem + nelem)
 				{
-					FillE2P(cline);
+					FillE2P_VTK(cline);
 					//Restart line reading loop because line has no other purpose
 					continue;
 				}
@@ -139,7 +140,7 @@ unsigned Reader::Readnelem(const string& line) {
 	return nel;
 }
 //	inpoel1 = matrix.generateMatrix(nelem, nnode);
-void Reader::FillE2P(const char* cline)
+void Reader::FillE2P_VTK(const char* cline)
 {
 	char* end;
 	unsigned j = 0;
@@ -147,7 +148,10 @@ void Reader::FillE2P(const char* cline)
 	{
 		cline = end;
 		//cout << c;cout << "\n";
-		if (j != 0) 
+		if (j == 0) {
+			*(int*)vtk[elem] = c;
+		}
+		else 
 		{
 			//cout << "j";cout << j;cout << "\n";
 			inpoel1[elem][j - 1] = c + 1;

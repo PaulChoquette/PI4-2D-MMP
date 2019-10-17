@@ -54,20 +54,20 @@ int main()
     maillage.npoin = FileContents.npoin;
     maillage.nelem = FileContents.nelem;
     maillage.nnode = FileContents.nnode;
+	maillage.vtk = FileContents.vtk;
     maillage.poinperFace = 2;
     maillage.nfael = 3;
     maillage.NbNdPerFace = 2;
-    maillage.NbFacePerELEM = 3;
     maillage.ddl = 2;
 ////////////////////////////////////////////////////////////////////
-    int inpoel_[8][3] = {{1, 2, 4}, {2, 5, 4}, {2, 3, 5}, {3, 6, 5}, {4, 5, 7}, {5, 8, 7}, {5, 6, 8}, {6, 9, 8}};
-    int lpofa_[2][3] = {{1, 2, 3},{2, 3, 1}};
-    int lnofa_[3]= {2, 2, 2};
+   // int inpoel_[8][3] = {{1, 2, 4}, {2, 5, 4}, {2, 3, 5}, {3, 6, 5}, {4, 5, 7}, {5, 8, 7}, {5, 6, 8}, {6, 9, 8}};
+//    int lpofa_[2][3] = {{1, 2, 3},{2, 3, 1}};
+ //   int lnofa_[3]= {2, 2, 2};
     double coord_[9][2] = {{0, 0}, {1, 0},{2, 0},{0, 1}, {1, 1},{2, 1},{0, 2},{1, 2},{2, 2}};
 ////////////////////////////////////////////////////////////////////
     int **inpoel = FileContents.inpoel1; // matrix.generateMatrix(maillage.nelem, maillage.nnode); 
-    int **lnofa = matrix.generateMatrix(maillage.nfael,1); 
-    int **lpofa = matrix.generateMatrix(maillage.poinperFace, maillage.nfael); 
+ //   int **lnofa = matrix.generateMatrix(maillage.nfael,1); 
+//    int **lpofa = matrix.generateMatrix(maillage.poinperFace, maillage.nfael); 
     double **coord = FileContents.coord; // matrix.generateMatrix_double(maillage.npoin, 2); 
 ////////////////////////////////////////////////////////////////////
 /*
@@ -78,7 +78,7 @@ int main()
             inpoel[i][j] = inpoel_[i][j];
         }
     } 
-*/
+
     for(int i=0; i<3; i++)
     {
         *(int*)lnofa[i] = lnofa_[i];
@@ -90,7 +90,7 @@ int main()
             lpofa[i][j] = lpofa_[i][j];
         }
     }
-/*
+
     for(int i = 0; i < maillage.npoin; i++) 
     {
         for(int j = 0; j < 2; j++) 
@@ -101,22 +101,22 @@ int main()
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     cout << ".....";cout << "\n";
-    int **esuel = maillage.init(inpoel,lpofa,lnofa,"esuel");
+    int **esuel = maillage.init(inpoel,"esuel");
     cout << ".....";cout << "\n";
     cout << "esuel (ou elem2elem)";cout << "\n";
     cout << ".....";cout << "\n";
     matrix.printMatrix(esuel,maillage.nelem,maillage.nfael);
     cout << ".....";cout << "\n";
     
-    int **elem2face = maillage.init(inpoel,lpofa,lnofa,"elem2face");
+    int **elem2face = maillage.init(inpoel,"elem2face");
     cout << "elem2face";cout << "\n";
     matrix.printMatrix(elem2face,maillage.nelem,maillage.nfael);
 
-    int **face2elem = maillage.init(inpoel,lpofa,lnofa,"face2elem");
+    int **face2elem = maillage.init(inpoel,"face2elem");
     cout << "face2elem";cout << "\n";
     matrix.printMatrix(face2elem,maillage.FaceNumber,2);
 
-    int **face2node = maillage.init(inpoel,lpofa,lnofa,"face2node");
+    int **face2node = maillage.init(inpoel,"face2node");
     cout << "face2node";cout << "\n";
     matrix.printMatrix(face2node,maillage.FaceNumber,2);
     

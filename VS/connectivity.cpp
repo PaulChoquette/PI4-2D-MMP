@@ -5,7 +5,70 @@
 #include <functional> // std::divides 
 #include "main.h"
 
-int ** connect::init(int **inpoel,int **lpofa,int **lnofa, string choix)
+int** connect::Get_lpofa(int** vtk, int ielem)
+{
+	int vtk_ind = *(int*)vtk[ielem];
+	matrix mat;
+	int** lpofa;
+	if (*(int*)vtk[ielem] == 5) {
+		lpofa = mat.generateMatrix(2, 3);
+		int lpofa_[2][3] = { {1, 2, 3},{2, 3, 1} };
+		for (int i = 0; i < 2; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				lpofa[i][j] = lpofa[i][j];
+			}
+		}
+		return lpofa;
+	}
+	else if (*(int*)vtk[ielem] == 9) {
+		lpofa = mat.generateMatrix(2, 4);
+		int lpofa_[2][4] = { {1, 2, 3, 4},{2, 3, 4, 1} };
+		for (int i = 0; i < 2; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				lpofa[i][j] = lpofa_[i][j];
+			}
+		}
+		return lpofa;
+	}
+	else {
+		return 0;
+	}
+}
+
+int** connect::Get_lnofa(int** vtk, int ielem)
+{
+	int vtk_ind = *(int*)vtk[ielem];
+	matrix mat;
+	int** lnofa;
+	if (*(int*)vtk[ielem] == 5) {
+		lnofa = mat.generateMatrix(3, 1);
+		int lnofa_[3] = { 2, 2, 2 };
+		for (int i = 0; i < 3; i++)
+		{
+			*(int*)lnofa[i] = lnofa_[i];
+		}
+		return lnofa;
+	}
+	else if (*(int*)vtk[ielem] == 9) {
+		lnofa = mat.generateMatrix(4, 1);
+		int lnofa_[4] = { 2, 2, 2, 2 };
+		for (int i = 0; i < 4; i++)
+		{
+			*(int*)lnofa[i] = lnofa_[i];
+		}
+		return lnofa;
+
+	}
+	else {
+		return 0;
+	}
+}
+
+int ** connect::init(int **inpoel, string choix)
 {
     matrix mat;
     int ipoil;
@@ -135,15 +198,17 @@ int ** connect::init(int **inpoel,int **lpofa,int **lnofa, string choix)
 		}
 	}
 
-    int nnofa, ifael, jelem,nnofj,jfael, jnofa, icoun, inofa, ypoin;
+    int nnofa, ifael, jelem, nnofj, jfael, jnofa, icoun, inofa, ypoin;
     int **lhelp = mat.generateMatrix(poinperFace,1); 
 
     for (ielem = 0; ielem < nelem ; ielem++)
     {
+		int** lnofa = Get_lnofa(vtk, ielem);
         //cout << " ..... ";cout << "\n";
         for (ifael = 0 ; ifael < nfael ; ifael++)
         {
             //cout << " ..... ";cout << "\n";
+			int** lpofa = Get_lpofa(vtk, ielem);
             nnofa =  *(int*)lnofa[ifael];
             //cout << " nnofa : ";cout << nnofa;cout << "\n";
             // lhelp(1:nnofa)=inpoel(lpofa(1:nnofa,ifael),ielem)
@@ -220,6 +285,8 @@ int ** connect::init(int **inpoel,int **lpofa,int **lnofa, string choix)
 
     for (int ielem = 0 ; ielem < nelem; ielem++)
     {
+		int** lnofa = Get_lnofa(vtk, ielem);
+		int** lpofa = Get_lpofa(vtk, ielem);
         for (int iface = 0; iface < nfael; iface++)
         {
             jelem = esuel[ielem][iface] ;
@@ -282,6 +349,8 @@ int ** connect::init(int **inpoel,int **lpofa,int **lnofa, string choix)
     return 0;
 
 }
+
+
 
 int ** connect::Face2Vec(int **elem2face, int **face2node, double **coord) 
 {

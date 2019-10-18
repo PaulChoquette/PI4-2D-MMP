@@ -17,7 +17,7 @@ int** connect::Get_lpofa(int** vtk, int ielem)
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				lpofa[i][j] = lpofa[i][j];
+				lpofa[i][j] = lpofa_[i][j];
 			}
 		}
 		return lpofa;
@@ -68,6 +68,42 @@ int** connect::Get_lnofa(int** vtk, int ielem)
 	}
 }
 
+int connect::Get_nnode(int ** vtk, int ielem)
+{
+	int vtk_ind = *(int*)vtk[ielem];
+	matrix mat;
+	int** lnofa;
+	if (*(int*)vtk[ielem] == 5) {
+		nnode = 3;
+		return nnode;
+	}
+	else if (*(int*)vtk[ielem] == 9) {
+		nnode = 4;
+		return nnode;
+	}
+	else {
+		return 0;
+	}
+}
+
+int connect::Get_nfael(int** vtk, int ielem)
+{
+	int vtk_ind = *(int*)vtk[ielem];
+	matrix mat;
+	int** lnofa;
+	if (*(int*)vtk[ielem] == 5) {
+		nfael = 3;
+		return nfael;
+	}
+	else if (*(int*)vtk[ielem] == 9) {
+		nfael = 4;
+		return nfael;
+	}
+	else {
+		return 0;
+	}
+}
+
 int ** connect::init(int **inpoel, string choix)
 {
     matrix mat;
@@ -81,6 +117,7 @@ int ** connect::init(int **inpoel, string choix)
 	}
     for (int ielem=0;  ielem < nelem; ielem++)
     {
+		nnode = Get_nnode(vtk, ielem);
         for (int inode = 0; inode < nnode; inode++ )
         {
             ipoil = inpoel[ielem][inode] ;
@@ -101,6 +138,7 @@ int ** connect::init(int **inpoel, string choix)
     // sizing de esup1
     for (int ielem = 0; ielem < nelem; ielem++)
     {
+		nnode = Get_nnode(vtk, ielem);
         for (int inode = 0; inode < nnode; inode++)
         {
             ipoin = inpoel[ielem][inode] - 1;
@@ -118,6 +156,7 @@ int ** connect::init(int **inpoel, string choix)
     int **esup1 = mat.generateMatrix(size, 1); 
     for (int ielem = 0; ielem < nelem; ielem++)
     {
+		nnode = Get_nnode(vtk, ielem);
         for (int inode = 0; inode < nnode; inode++)
         {
             ipoin = inpoel[ielem][inode] - 1;
@@ -147,6 +186,7 @@ int ** connect::init(int **inpoel, string choix)
         for (int iesup = *(int*)esup2[ipoin - 1] + 1; iesup <= *(int*)esup2[ipoin + 1 - 1]; iesup++ )
         {
             ielem = *(int*)esup1[iesup-1];
+			nnode = Get_nnode(vtk, ielem-1);
             for (int inode = 1; inode <= nnode; inode++ )
             {
                 jpoin = inpoel[ielem - 1][inode -1 ];
@@ -169,6 +209,7 @@ int ** connect::init(int **inpoel, string choix)
         for (int iesup = *(int*)esup2[ipoin-1]+1; iesup <= *(int*)esup2[ipoin+1 - 1]; iesup++ )
         {
             ielem = *(int*)esup1[iesup-1];
+			nnode = Get_nnode(vtk, ielem-1);
             for (int inode = 1; inode <= nnode; inode++ )
             {
                 jpoin = inpoel[ielem - 1][inode -1 ];
@@ -189,10 +230,10 @@ int ** connect::init(int **inpoel, string choix)
 
     int **rpoin = mat.generateMatrix(npoin, 1); 
 
-    int **esuel = mat.generateMatrix(nelem, nfael); 
+    int **esuel = mat.generateMatrix(nelem, nfaelmax); 
 	for (int ielem = 0; ielem < nelem; ielem++)
 	{
-		for (int ifael = 0; ifael < nfael; ifael++)
+		for (int ifael = 0; ifael < nfaelmax; ifael++)
 		{
 			esuel[ielem][ifael] = 0;
 		}
@@ -204,6 +245,7 @@ int ** connect::init(int **inpoel, string choix)
     for (ielem = 0; ielem < nelem ; ielem++)
     {
 		int** lnofa = Get_lnofa(vtk, ielem);
+		nfael = Get_nfael(vtk, ielem);
         //cout << " ..... ";cout << "\n";
         for (ifael = 0 ; ifael < nfael ; ifael++)
         {
@@ -225,6 +267,7 @@ int ** connect::init(int **inpoel, string choix)
                 jelem =  *(int*)esup1[istor] - 1;
                 if (jelem != ielem)
                 {
+					nfael = Get_nfael(vtk, jelem);
                     for (jfael = 0 ; jfael < nfael; jfael++)
                     {
                         nnofj =  *(int*)lnofa[jfael];
@@ -260,10 +303,11 @@ int ** connect::init(int **inpoel, string choix)
     int yelem,yfael;
     int numface = 0;
 
-    int **elem2face = mat.generateMatrix(nelem,nfael); 
+    int **elem2face = mat.generateMatrix(nelem,nfaelmax); 
     
     for (int ielem = 0 ; ielem <= nelem - 1; ielem++)
     {
+		nfael = Get_nfael(vtk, ielem);
         for (int iface = 0; iface <= nfael - 1; iface++)
         {
             jelem = esuel[ielem][iface];
@@ -287,6 +331,7 @@ int ** connect::init(int **inpoel, string choix)
     {
 		int** lnofa = Get_lnofa(vtk, ielem);
 		int** lpofa = Get_lpofa(vtk, ielem);
+		nfael = Get_nfael(vtk, ielem);
         for (int iface = 0; iface < nfael; iface++)
         {
             jelem = esuel[ielem][iface] ;
@@ -302,6 +347,7 @@ int ** connect::init(int **inpoel, string choix)
 
                 for (yelem = 0; yelem <= nelem -1 ; yelem++)
                 {
+					nfael = Get_nfael(vtk, yelem);
                     for (yfael = 0; yfael <= nfael - 1; yfael++)
                     {
                         if ((esuel[yelem][yfael]-1 == ielem) && (yelem==jelem-1))
@@ -355,9 +401,10 @@ int ** connect::init(int **inpoel, string choix)
 int ** connect::Face2Vec(int **elem2face, int **face2node, double **coord) 
 {
     matrix mat;
-    int **Face2Vec = mat.generateMatrix(FaceNumber, NbNdPerFace); 
+    int **Face2Vec = mat.generateMatrix(FaceNumber, nnodemax); 
     for(int i = 0; i < nelem; i++) 
     {
+		nfael = Get_nfael(vtk, i);
         for(int k = 0; k < nfael; k++)
         {
             for(int j = 0; j < ddl; j++)
@@ -372,17 +419,17 @@ int ** connect::Face2Vec(int **elem2face, int **face2node, double **coord)
 int ** connect::Elem2Node(int **elem2face,int **face2node) 
 {
     matrix mat;
-    int NbNdPerElem = nfael;
-    int **Elem2Node = mat.generateMatrix(nelem, NbNdPerElem); 
+    int **Elem2Node = mat.generateMatrix(nelem, nnodemax); 
     for(int i = 0; i < nelem; i++) 
     {
+		nnode = Get_nnode(vtk, i);
         //cout << " ....... ";cout << "\n";
-        for(int k = 0; k < NbNdPerElem; k++)
+        for(int k = 0; k < nnode; k++)
         {
             if (Elem2Node[i][k] == face2node[elem2face[i][k] - 1][0] || k == 0)
             {
                 Elem2Node[i][k] = face2node[elem2face[i][k] - 1][0];
-                if (k<NbNdPerElem-1)
+                if (k<nnode-1)
                 {
                     Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][1];
                 }
@@ -390,7 +437,7 @@ int ** connect::Elem2Node(int **elem2face,int **face2node)
             else if (Elem2Node[i][k] == face2node[elem2face[i][k] - 1][1])
             {
                 Elem2Node[i][k] = face2node[elem2face[i][k] - 1][1];
-                if (k<NbNdPerElem-1)
+                if (k<nnode-1)
                 {
                     Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][0];
                 }
@@ -398,7 +445,7 @@ int ** connect::Elem2Node(int **elem2face,int **face2node)
             else if (Elem2Node[i][k-1] == face2node[elem2face[i][k] - 1][1])
             {
                 Elem2Node[i][k] = face2node[elem2face[i][k] - 1][0];
-                if (k<NbNdPerElem-1)
+                if (k<nnode-1)
                 {
                     Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][1];
                 }
@@ -406,7 +453,7 @@ int ** connect::Elem2Node(int **elem2face,int **face2node)
             else
             {
                 Elem2Node[i][k] = face2node[elem2face[i][k] - 1][1];
-                if (k<NbNdPerElem-1)
+                if (k<nnode-1)
                 {
                     Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][0];
                 }
@@ -418,14 +465,15 @@ int ** connect::Elem2Node(int **elem2face,int **face2node)
 
 double ** connect::Elem2Vec_x(int **Elem2Node,double **coord)
 {
-    NbNdPerElem = 3; // aussi = Nbr face par elem
+    nnode = 3; // aussi = Nbr face par elem
     matrix mat;
-    double **Elem2Vec_x = mat.generateMatrix_double(nelem, NbNdPerElem); 
+    double **Elem2Vec_x = mat.generateMatrix_double(nelem, nnodemax); 
     for(int i = 0; i < nelem; i++) 
     {
-        for(int k = 0; k < NbNdPerElem; k++)
+		nnode = Get_nnode(vtk, i);
+        for(int k = 0; k < nnode; k++)
         {
-            if (k == NbNdPerElem-1)
+            if (k == nnode-1)
             {
                 Elem2Vec_x[i][k] = coord[Elem2Node[i][0] - 1][0] - coord[Elem2Node[i][k] - 1][0];
             }
@@ -441,14 +489,14 @@ double ** connect::Elem2Vec_x(int **Elem2Node,double **coord)
 
 double ** connect::Elem2Vec_y(int **Elem2Node,double **coord)
 {
-    NbNdPerElem = 3; // aussi = Nbr face par elem
     matrix mat;
-    double **Elem2Vec_y = mat.generateMatrix_double(nelem, NbNdPerElem); 
+    double **Elem2Vec_y = mat.generateMatrix_double(nelem, nnodemax); 
     for(int i = 0; i < nelem; i++) 
     {
-        for(int k = 0; k < NbNdPerElem; k++)
+		nnode = Get_nnode(vtk, i);
+        for(int k = 0; k < nnode; k++)
         {
-            if (k == NbNdPerElem-1)
+            if (k == nnode-1)
             {
                 Elem2Vec_y[i][k] = coord[Elem2Node[i][0] - 1][1] - coord[Elem2Node[i][k] - 1][1];
             }
@@ -464,7 +512,6 @@ double ** connect::Elem2Vec_y(int **Elem2Node,double **coord)
 
 double ** connect::Elem2Area(int **Elem2Node, double **coord)
 {
-    NbNdPerElem = 3; // aussi = Nbr face par elem
     matrix mat;
     double **Elem2Area = mat.generateMatrix_double(nelem, 1); 
     cout << " --- Elem2Area ---";cout << "\n";
@@ -486,14 +533,15 @@ double ** connect::Elem2Area(int **Elem2Node, double **coord)
 
 double ** connect::Elem2Normal(int **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_y, string choix)
 {
-    NbNdPerElem = 3; // aussi = Nbr face par elem
+    nnode = 3; // aussi = Nbr face par elem
     matrix mat;
-    double **Elem2Normal_x = mat.generateMatrix_double(nelem, NbNdPerElem);
-    double **Elem2Normal_y = mat.generateMatrix_double(nelem, NbNdPerElem); 
+    double **Elem2Normal_x = mat.generateMatrix_double(nelem, nnodemax);
+    double **Elem2Normal_y = mat.generateMatrix_double(nelem, nnodemax); 
 
     for(int i = 0; i < nelem; i++)
     {   
-        for(int k = 0; k < NbNdPerElem; k++)
+		nnode = Get_nnode(vtk, i);
+        for(int k = 0; k < nnode; k++)
         {
             double Y = 1.0;
             double X = 1.0;

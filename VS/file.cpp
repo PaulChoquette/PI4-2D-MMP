@@ -50,7 +50,7 @@ void Reader::read_1(string File_Name)
 	//// inpoel1 //////
 	///////////////////
 					lineNelem = linen;
-					inpoel1 = matrix.generateMatrix(nelem, nnode); 
+					inpoel1 = matrix.generateMatrix(nelem, nnodemax); 
 					vtk = matrix.generateMatrix(nelem,1);
 					//matrix.printMatrix(inpoel1, nelem,nnode);
 					continue;

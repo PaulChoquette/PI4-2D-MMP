@@ -56,6 +56,7 @@ class Reader {
 		void read_1(string File_Name);
 		unsigned ndime, nelem, npoin;
 		int nnode; // Nbre noeud par element
+		int nnodemax;
 		int **inpoel1;
 		double **coord;
 		int** vtk;
@@ -82,6 +83,7 @@ class connect
         // Attributs
         int npoin, nelem, nnode;
         int nfael;
+		int nfaelmax,nnodemax;
         int poinperFace;
         int FaceNumber;
         int NbNdPerFace;
@@ -95,6 +97,8 @@ class connect
         int ** init(int **inpoel, string choix);
 		int ** Get_lpofa(int** vtk, int ielem);
 		int ** Get_lnofa(int** vtk, int ielem);
+		int Get_nnode(int** vtk, int ielem);
+		int Get_nfael(int** vtk, int ielem);
         int ** Face2Vec(int **elem2face, int **face2node, double **coord);
         int ** Elem2Node(int **elem2face,int **face2node);
         double ** Elem2Vec_x(int **Elem2Node,double **coord);

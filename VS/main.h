@@ -22,7 +22,7 @@ class matrix
         void deleteMatrix(int ** mat, int rows, int cols);
         int ** generateMatrix(int rows, int cols);
         double ** generateMatrix_double(int rows, int cols);
-        unsigned ** generateMatrix_unsigned(int rows, int cols);
+        unsigned ** generateMatrix_unsigned(unsigned rows, unsigned cols);
 };
 
 template <class T>
@@ -53,23 +53,37 @@ class Reader {
 		ifstream file;
 		matrix matrix;
 
-		void read_1(string File_Name);
+		unsigned linen;
+		string line;
+
+		void read_file(string File_Name);
 		unsigned ndime, nelem, npoin;
-		int nnode; // Nbre noeud par element
-		int nnodemax;
-		int **inpoel1;
+		unsigned short nmark;
+		unsigned nnode; // Nbre noeud par element
+		unsigned nnodemax;
+		unsigned **inpoel1;
 		double **coord;
 		int** vtk;
 		unsigned elem, poin;
-		int lineNelem;
-		int poinlinen;
+		unsigned lineNelem;
+		unsigned poinlinen;
+		unsigned marklinen;
+		unsigned marknl, melem, markn, markelemn;
+		string* markername;
+		unsigned step;
+		unsigned*** markerdata;
+		unsigned imen;
 
 		bool OpenFile(string filename);
 		bool IsDefined(int numb);
 
 		unsigned Readndime(const string& line);
 		unsigned Readnelem(const string& line);
+		unsigned Readnmark(const string& line);
+		unsigned Readmarkelemn(const string& line);
 		void FillE2P_VTK(const char* cline);
+		void FillMarker(const char* cline, int markn);
+		string FillMarkTag(const string& line);
 
 		unsigned Readnpoin(const string& line);
 		double ** FillCoord(const char* cline);
@@ -94,7 +108,7 @@ class connect
         
 
         // Methods 
-        int ** init(int **inpoel, string choix);
+        int ** init(unsigned **inpoel, string choix);
 		int ** Get_lpofa(int** vtk, int ielem);
 		int ** Get_lnofa(int** vtk, int ielem);
 		int Get_nnode(int** vtk, int ielem);

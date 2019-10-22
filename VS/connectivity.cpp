@@ -104,7 +104,7 @@ int connect::Get_nfael(int** vtk, int ielem)
 	}
 }
 
-int ** connect::init(int **inpoel, string choix)
+int ** connect::init(unsigned **inpoel, string choix)
 {
     matrix mat;
     int ipoil;

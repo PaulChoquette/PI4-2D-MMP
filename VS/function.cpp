@@ -32,7 +32,15 @@ void matrix::printMatrix_double(double ** mat, int rows, int cols)
     }
 }
 
-
+void matrix::printMatrix_unsigned(unsigned** mat, int rows, int cols)
+{
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			std::cout << mat[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+}
 
 void matrix::deleteMatrix(int ** mat, int rows, int cols) {
     //delete rows
@@ -70,6 +78,19 @@ double ** matrix::generateMatrix_double(int rows, int cols)
     }
     //return the pointer to pointer
     return mat;
+}
+
+unsigned** matrix::generateMatrix_unsigned(unsigned rows, unsigned cols)
+{
+	//pointer to pointer, to the element at row 1, column 1
+	unsigned** mat = new unsigned* [rows];
+	//for each row, create an array with size equal to number of elements in a column
+	for (int i = 0; i < rows; i++)
+	{
+		mat[i] = new unsigned[cols];
+	}
+	//return the pointer to pointer
+	return mat;
 }
 
 #define MIN_CAPACITY 10

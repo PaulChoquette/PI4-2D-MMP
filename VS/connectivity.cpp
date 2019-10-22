@@ -518,13 +518,18 @@ double ** connect::Elem2Area(int **Elem2Node, double **coord)
     mat.printMatrix_double(Elem2Area,nelem, 1); 
     for(int i = 0; i < nelem; i++) 
     {
-            double dX0 = coord[Elem2Node[i][0] - 1][0];
-            double dX1 = coord[Elem2Node[i][1] - 1][0];
-            double dX2 = coord[Elem2Node[i][2] - 1][0];
-            double dY0 = coord[Elem2Node[i][0] - 1][1];
-            double dY1 = coord[Elem2Node[i][1] - 1][1];
-            double dY2 = coord[Elem2Node[i][2] - 1][1];
-            double dArea = ((dX1 - dX0)*(dY2 - dY0) - (dX2 - dX0)*(dY1 - dY0))/2.0;
+		double sumnode=0;
+		nnode = Get_nnode(vtk, i);
+		// Area definition according to https://www.mathopenref.com/coordpolygonarea.html
+		for (int j = 0; j < nnode; j++) {
+			if (j != nnode - 1) {
+				sumnode += coord[Elem2Node[i][j] - 1][0] * coord[Elem2Node[i][j + 1] - 1][1] - coord[Elem2Node[i][j] - 1][1] * coord[Elem2Node[i][j + 1] - 1][0];
+			}
+			else {
+				sumnode += coord[Elem2Node[i][j] - 1][0] * coord[Elem2Node[i][0] - 1][1] - coord[Elem2Node[i][j] - 1][1] * coord[Elem2Node[i][0] - 1][0];
+			}
+		}
+            double dArea = fabs(sumnode/2.0);
             Elem2Area[i][0] = dArea;
     }
     return Elem2Area;

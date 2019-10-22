@@ -18,9 +18,6 @@
     <ClCompile Include="connectivity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="file.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="function.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -31,6 +28,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="roe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="writer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -149,4 +149,13 @@ class roe
 
 };
 
+class Writer
+{
+	public:
+		//Attributs
+		ofstream outfile;
+		int npoin, nelem, nnodemax;
+		//Methods
+		void Write_Output(string filename, int nvar,string* varname, unsigned** inpoel,double ** coord, double ** vararr);
+};
 

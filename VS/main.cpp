@@ -16,8 +16,8 @@ int main()
 	FileContents.nnodemax = 4;
 
 	//ifstream meshfile("naca0012_129x129_1B_JAMESON.su2");
-	//string File_Name = "square.su2";
-	string File_Name = "naca0012_129x129_1B_JAMESON.su2";
+	string File_Name = "square.su2";
+	//string File_Name = "naca0012_129x129_1B_JAMESON.su2";
 
 	if (FileContents.OpenFile(File_Name))
 	{
@@ -25,17 +25,17 @@ int main()
 		FileContents.file.close();
 	}
 
-/* Debug Printout, removing accelerates code immensely
+//Debug Printout, removing accelerates code immensely
 	cout << "--- INPOEL ---";cout << "\n";
-	matrix.printMatrix_unsigned(FileContents.inpoel1,FileContents.nelem,FileContents.nnodemax);
+	matrix.printMatrix_unsigned(FileContents.inpoel1_wf,FileContents.nelem+FileContents.totalmarken,FileContents.nnodemax);
 
 	cout << "--- Coord ---";cout << "\n";
 	matrix.printMatrix_double(FileContents.coord,FileContents.npoin,FileContents.ndime);
 
-	cout << "--- MARKER ---"; cout << "\n";
-	for (int i = 0; i < FileContents.nmark; i++) {
-		cout << FileContents.markername[i] << "\n";
-	}
+	//cout << "--- MARKER ---"; cout << "\n";
+	//for (int i = 0; i < FileContents.nmark; i++) {
+	//	cout << FileContents.markername[i] << "\n";
+	//}
     cout << "--- NELEM ";cout << "  :  ";
     cout << FileContents.nelem;cout << "			";
 	cout << "--- Position ";cout << "  :  ";
@@ -51,15 +51,15 @@ int main()
 
 	cout << "--- ndime ";cout << "   :  ";
 	cout << FileContents.ndime;cout << "\n";
-*/
+
 	
 //////////////////////-------------------------------------------------------------------------//////////////////////
 //////////////////////-------------------------------------------------------------------------//////////////////////
     connect maillage;
     maillage.npoin = FileContents.npoin;
-    maillage.nelem = FileContents.nelem;
+    maillage.nelem = FileContents.nelem+FileContents.ffelemn;
     //maillage.nnode = FileContents.nnode;
-	maillage.vtk = FileContents.vtk;
+	maillage.vtk = FileContents.vtk_wf;
     maillage.poinperFace = 2;
     maillage.nfaelmax = 4;
 	maillage.nnodemax = FileContents.nnodemax;
@@ -71,8 +71,7 @@ int main()
  //   int lnofa_[3]= {2, 2, 2};
     double coord_[9][2] = {{0, 0}, {1, 0},{2, 0},{0, 1}, {1, 1},{2, 1},{0, 2},{1, 2},{2, 2}};
 ////////////////////////////////////////////////////////////////////
-    unsigned **inpoel = FileContents.inpoel1; // matrix.generateMatrix(maillage.nelem, maillage.nnode); 
- //   int **lnofa = matrix.generateMatrix(maillage.nfael,1); 
+    unsigned **inpoel = FileContents.inpoel1_wf; // matrix.generateMatrix(maillage.nelem, maillage.nnode); 											//   int **lnofa = matrix.generateMatrix(maillage.nfael,1); 
 //    int **lpofa = matrix.generateMatrix(maillage.poinperFace, maillage.nfael); 
     double **coord = FileContents.coord; // matrix.generateMatrix_double(maillage.npoin, 2); 
 ////////////////////////////////////////////////////////////////////
@@ -110,63 +109,63 @@ int main()
     int **esuel = maillage.init(inpoel,"esuel");
     cout << ".....";cout << "\n";
     cout << "esuel (ou elem2elem)";cout << "\n";
-    //cout << ".....";cout << "\n";
-    //matrix.printMatrix(esuel,maillage.nelem,maillage.nfaelmax);
-    //cout << ".....";cout << "\n";
+    cout << ".....";cout << "\n";
+    matrix.printMatrix(esuel,maillage.nelem,maillage.nfaelmax);
+    cout << ".....";cout << "\n";
     
     int **elem2face = maillage.init(inpoel,"elem2face");
     cout << "elem2face";cout << "\n";
-    //matrix.printMatrix(elem2face,maillage.nelem,maillage.nfaelmax);
+    matrix.printMatrix(elem2face,maillage.nelem,maillage.nfaelmax);
 
     int **face2elem = maillage.init(inpoel,"face2elem");
     cout << "face2elem";cout << "\n";
-    //matrix.printMatrix(face2elem,maillage.FaceNumber,2);
+   matrix.printMatrix(face2elem,maillage.FaceNumber,2);
 
     int **face2node = maillage.init(inpoel,"face2node");
     cout << "face2node";cout << "\n";
-    //matrix.printMatrix(face2node,maillage.FaceNumber,2);
+    matrix.printMatrix(face2node,maillage.FaceNumber,2);
     
     cout << "coord";cout << "\n";
-    //matrix.printMatrix_double(coord,maillage.npoin,2);
+    matrix.printMatrix_double(coord,maillage.npoin,2);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     int **Face2Vec = maillage.Face2Vec(elem2face, face2node, coord);
     cout << "Face2Vec";cout << "\n";
-   // matrix.printMatrix(Face2Vec,maillage.FaceNumber, maillage.NbNdPerFace);
+    matrix.printMatrix(Face2Vec,maillage.FaceNumber, maillage.NbNdPerFace);
 
-    int **Elem2Node = maillage.Elem2Node(elem2face,face2node);
-    cout << "Elem2Node";cout << "\n";
-    //matrix.printMatrix(Elem2Node,maillage.nelem, maillage.nfaelmax);
+    //int **inpoel = maillage.inpoel(elem2face,face2node);
+    cout << "inpoel";cout << "\n";
+    //matrix.printMatrix(inpoel,maillage.nelem, maillage.nfaelmax);
 
-    double **Elem2Vec_x = maillage.Elem2Vec_x(Elem2Node,coord);
+    double **Elem2Vec_x = maillage.Elem2Vec_x(inpoel,coord);
     cout << "Elem2Vec_x";cout << "\n";
-    //matrix.printMatrix_double(Elem2Vec_x,maillage.nelem, maillage.nnodemax);
+    matrix.printMatrix_double(Elem2Vec_x,maillage.nelem, maillage.nnodemax);
 
-    double **Elem2Vec_y = maillage.Elem2Vec_y(Elem2Node,coord);
+    double **Elem2Vec_y = maillage.Elem2Vec_y(inpoel,coord);
     cout << "Elem2Vec_y";cout << "\n";
-    //matrix.printMatrix_double(Elem2Vec_y,maillage.nelem, maillage.nnodemax);  
+    matrix.printMatrix_double(Elem2Vec_y,maillage.nelem, maillage.nnodemax);  
 
     cout << " --- Elem2Vec --- ";cout << "\n";
-    //matrix.printXY_double(Elem2Vec_x,Elem2Vec_y,maillage.nelem, maillage.nnodemax);    
+    matrix.printXY_double(Elem2Vec_x,Elem2Vec_y,maillage.nelem, maillage.nnodemax);    
 
     
-    double **Elem2Area = maillage.Elem2Area(Elem2Node,coord);
+    double **Elem2Area = maillage.Elem2Area(inpoel,coord);
     cout << "Elem2Area";cout << "\n";
-    //matrix.printMatrix_double(Elem2Area,maillage.nelem, 1); 
+    matrix.printMatrix_double(Elem2Area,maillage.nelem, 1); 
 
 
-    double **Elem2Normal_x = maillage.Elem2Normal(Elem2Node,coord,Elem2Vec_x,Elem2Vec_y, "x");
+    double **Elem2Normal_x = maillage.Elem2Normal(inpoel,coord,Elem2Vec_x,Elem2Vec_y, "x");
     cout << "Elem2Normal_x";cout << "\n";
-    //matrix.printMatrix_double(Elem2Normal_x,maillage.nelem, maillage.nnodemax);
+    matrix.printMatrix_double(Elem2Normal_x,maillage.nelem, maillage.nnodemax);
 
-    double **Elem2Normal_y = maillage.Elem2Normal(Elem2Node,coord,Elem2Vec_x,Elem2Vec_y, "y");
+    double **Elem2Normal_y = maillage.Elem2Normal(inpoel,coord,Elem2Vec_x,Elem2Vec_y, "y");
     cout << "Elem2Normal_y";cout << "\n";
-    //matrix.printMatrix_double(Elem2Normal_y,maillage.nelem, maillage.nnodemax);  
+    matrix.printMatrix_double(Elem2Normal_y,maillage.nelem, maillage.nnodemax);  
 
     cout << "elem2face";cout << "\n";
     //matrix.printMatrix(elem2face,maillage.nelem,maillage.nfaelmax);
 
     cout << " --- Elem2Normal --- ";cout << "\n";
-    //matrix.printXY_double(Elem2Normal_x,Elem2Normal_y,maillage.nelem, maillage.nnodemax);
+    matrix.printXY_double(Elem2Normal_x,Elem2Normal_y,maillage.nelem, maillage.nnodemax);
 
 //////////////////////-------------------------------------------------------------------------//////////////////////
 //////////////////////-------------------------------------------------------------------------//////////////////////

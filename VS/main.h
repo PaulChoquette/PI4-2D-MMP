@@ -62,17 +62,19 @@ class Reader {
 		unsigned nnode; // Nbre noeud par element
 		unsigned nnodemax;
 		unsigned **inpoel1;
+		unsigned** inpoel1_wf; //inpoel1 with fantom cells
 		double **coord;
 		int** vtk;
+		int** vtk_wf;
 		unsigned elem, poin;
 		unsigned lineNelem;
 		unsigned poinlinen;
 		unsigned marklinen;
-		unsigned marknl, melem, markn, markelemn;
+		unsigned marknl, melem, markn, markelemn, ffelemn;
 		string* markername;
 		unsigned step;
 		unsigned*** markerdata;
-		unsigned imen;
+		unsigned imen, totalmarken;
 
 		bool OpenFile(string filename);
 		bool IsDefined(int numb);
@@ -115,10 +117,10 @@ class connect
 		int Get_nfael(int** vtk, int ielem);
         int ** Face2Vec(int **elem2face, int **face2node, double **coord);
         int ** Elem2Node(int **elem2face,int **face2node);
-        double ** Elem2Vec_x(int **Elem2Node,double **coord);
-        double ** Elem2Vec_y(int **Elem2Node,double **coord);
-        double ** Elem2Area(int **Elem2Node,double **coord);
-        double ** Elem2Normal(int **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_Y, string choix);
+        double ** Elem2Vec_x(unsigned **Elem2Node,double **coord);
+        double ** Elem2Vec_y(unsigned **Elem2Node,double **coord);
+        double ** Elem2Area(unsigned **Elem2Node,double **coord);
+        double ** Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_Y, string choix);
         
 
 };

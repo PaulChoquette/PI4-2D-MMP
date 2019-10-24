@@ -125,6 +125,9 @@ void Reader::read_file(string File_Name)
 					}
 					else if (step == 1) {
 						markelemn = Readmarkelemn(line);
+						if (markn == 0) {
+							ffelemn = markelemn;
+						}
 						markerdata[markn] = matrix.generateMatrix_unsigned(markelemn,2);  // 2 since we are in 2D and boundaries will always be lines
 						marknl += markelemn; //add nelem since each elem has 1 line
 						imen = 0; //counter for marker element number used in FillMarker
@@ -137,8 +140,27 @@ void Reader::read_file(string File_Name)
 							step = 0;
 						}
 					}
+					if (markn == nmark) {
+						totalmarken = marknl - 2 * nmark;
+						inpoel1_wf = matrix.generateMatrix_unsigned(nelem + totalmarken, nnodemax);
+						vtk_wf = matrix.generateMatrix(nelem + totalmarken, 1);
+						for (int ielem = 0; ielem < nelem; ielem++) {
+							*(int*)vtk_wf[ielem] = *(int*)vtk[ielem];
+							for (int inode = 0; inode < nnodemax; inode++) {
+								inpoel1_wf[ielem][inode] = inpoel1[ielem][inode];
+							}
+						}
+						for (int ifc = 0; ifc < ffelemn; ifc++) {
+							*(int*)vtk_wf[nelem + ifc] = 3;
+							for (int j = 0; j < 2; j++) {
+								inpoel1_wf[nelem + ifc][0] = markerdata[0][ifc][0];
+								inpoel1_wf[nelem + ifc][1] = markerdata[0][ifc][1];
+							}
+						}
+					}
 				}
 			}
+			
 
 		}
 	}

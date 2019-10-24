@@ -34,6 +34,18 @@ int** connect::Get_lpofa(int** vtk, int ielem)
 		}
 		return lpofa;
 	}
+	else if (*(int*)vtk[ielem] == 3) {
+		lpofa = mat.generateMatrix(2, 1);
+		int lpofa_[2][1] = { {1},{2} };
+		for (int i = 0; i < 2; i++)
+		{
+			for (int j = 0; j < 1; j++)
+			{
+				lpofa[i][j] = lpofa_[i][j];
+			}
+		}
+		return lpofa;
+	}
 	else {
 		return 0;
 	}
@@ -63,6 +75,16 @@ int** connect::Get_lnofa(int** vtk, int ielem)
 		return lnofa;
 
 	}
+	else if (*(int*)vtk[ielem] == 3) {
+		lnofa = mat.generateMatrix(1, 1);
+		int lnofa_[1] = { 2 };
+		for (int i = 0; i < 1; i++)
+		{
+			*(int*)lnofa[i] = lnofa_[i];
+		}
+		return lnofa;
+
+	}
 	else {
 		return 0;
 	}
@@ -72,14 +94,19 @@ int connect::Get_nnode(int ** vtk, int ielem)
 {
 	int vtk_ind = *(int*)vtk[ielem];
 	matrix mat;
+	int innode;
 	int** lnofa;
 	if (*(int*)vtk[ielem] == 5) {
-		nnode = 3;
-		return nnode;
+		innode = 3;
+		return innode;
 	}
 	else if (*(int*)vtk[ielem] == 9) {
-		nnode = 4;
-		return nnode;
+		innode = 4;
+		return innode;
+	}
+	else if (*(int*)vtk[ielem] == 3) {
+		innode = 2;
+		return innode;
 	}
 	else {
 		return 0;
@@ -90,14 +117,19 @@ int connect::Get_nfael(int** vtk, int ielem)
 {
 	int vtk_ind = *(int*)vtk[ielem];
 	matrix mat;
+	int infael;
 	int** lnofa;
 	if (*(int*)vtk[ielem] == 5) {
-		nfael = 3;
-		return nfael;
+		infael = 3;
+		return infael;
 	}
 	else if (*(int*)vtk[ielem] == 9) {
-		nfael = 4;
-		return nfael;
+		infael = 4;
+		return infael;
+	}
+	else if (*(int*)vtk[ielem] == 3) {
+		infael = 1;
+		return infael;
 	}
 	else {
 		return 0;
@@ -244,20 +276,20 @@ int ** connect::init(unsigned **inpoel, string choix)
 
     for (ielem = 0; ielem < nelem ; ielem++)
     {
-		int** lnofa = Get_lnofa(vtk, ielem);
-		nfael = Get_nfael(vtk, ielem);
+		int** ilnofa = Get_lnofa(vtk, ielem);
+		int infael = Get_nfael(vtk, ielem);
         //cout << " ..... ";cout << "\n";
-        for (ifael = 0 ; ifael < nfael ; ifael++)
+        for (ifael = 0 ; ifael < infael ; ifael++)
         {
             //cout << " ..... ";cout << "\n";
-			int** lpofa = Get_lpofa(vtk, ielem);
-            nnofa =  *(int*)lnofa[ifael];
+			int** ilpofa = Get_lpofa(vtk, ielem);
+            nnofa =  *(int*)ilnofa[ifael];
             //cout << " nnofa : ";cout << nnofa;cout << "\n";
             // lhelp(1:nnofa)=inpoel(lpofa(1:nnofa,ifael),ielem)
             for (inofa = 0 ; inofa < nnofa; inofa++)
             {
                 //cout << " ..... ";cout << "\n";
-                *(int*)lhelp[inofa] = inpoel[ielem][lpofa[inofa][ifael]-1];
+                *(int*)lhelp[inofa] = inpoel[ielem][ilpofa[inofa][ifael]-1];
                 *(int*)rpoin[*(int*)lhelp[inofa] - 1] = 1;
                 ipoin = *(int*)lhelp[0];
             }
@@ -267,16 +299,18 @@ int ** connect::init(unsigned **inpoel, string choix)
                 jelem =  *(int*)esup1[istor] - 1;
                 if (jelem != ielem)
                 {
-					nfael = Get_nfael(vtk, jelem);
-                    for (jfael = 0 ; jfael < nfael; jfael++)
+					int** jlnofa = Get_lnofa(vtk, jelem);
+					int jnfael = Get_nfael(vtk, jelem);
+                    for (jfael = 0 ; jfael < jnfael; jfael++)
                     {
-                        nnofj =  *(int*)lnofa[jfael];
+						int** jlpofa = Get_lpofa(vtk, jelem);
+                        nnofj =  *(int*)jlnofa[jfael];
                         if (nnofj == nnofa)
                         {
                             icoun = 0;
                             for (jnofa = 0 ; jnofa < nnofa; jnofa++)
                             {
-                                jpoin = inpoel[jelem][lpofa[jnofa][jfael]-1];
+                                jpoin = inpoel[jelem][jlpofa[jnofa][jfael]-1];
                                 icoun +=  *(int*)rpoin[jpoin-1];
                             }
                             if (icoun == nnofa)
@@ -308,7 +342,7 @@ int ** connect::init(unsigned **inpoel, string choix)
     for (int ielem = 0 ; ielem <= nelem - 1; ielem++)
     {
 		nfael = Get_nfael(vtk, ielem);
-        for (int iface = 0; iface <= nfael - 1; iface++)
+        for (int iface = 0; iface < nfael; iface++)
         {
             jelem = esuel[ielem][iface];
             if (ielem < jelem)
@@ -347,8 +381,8 @@ int ** connect::init(unsigned **inpoel, string choix)
 
                 for (yelem = 0; yelem <= nelem -1 ; yelem++)
                 {
-					nfael = Get_nfael(vtk, yelem);
-                    for (yfael = 0; yfael <= nfael - 1; yfael++)
+					int ynfael = Get_nfael(vtk, yelem);
+                    for (yfael = 0; yfael <= ynfael - 1; yfael++)
                     {
                         if ((esuel[yelem][yfael]-1 == ielem) && (yelem==jelem-1))
                         {
@@ -463,7 +497,7 @@ int ** connect::Elem2Node(int **elem2face,int **face2node)
     return Elem2Node;
 }
 
-double ** connect::Elem2Vec_x(int **Elem2Node,double **coord)
+double ** connect::Elem2Vec_x(unsigned **Elem2Node,double **coord)
 {
     nnode = 3; // aussi = Nbr face par elem
     matrix mat;
@@ -487,7 +521,7 @@ double ** connect::Elem2Vec_x(int **Elem2Node,double **coord)
 }
 
 
-double ** connect::Elem2Vec_y(int **Elem2Node,double **coord)
+double ** connect::Elem2Vec_y(unsigned **Elem2Node,double **coord)
 {
     matrix mat;
     double **Elem2Vec_y = mat.generateMatrix_double(nelem, nnodemax); 
@@ -510,12 +544,10 @@ double ** connect::Elem2Vec_y(int **Elem2Node,double **coord)
 }
 
 
-double ** connect::Elem2Area(int **Elem2Node, double **coord)
+double ** connect::Elem2Area(unsigned **Elem2Node, double **coord)
 {
     matrix mat;
     double **Elem2Area = mat.generateMatrix_double(nelem, 1); 
-    cout << " --- Elem2Area ---";cout << "\n";
-    mat.printMatrix_double(Elem2Area,nelem, 1); 
     for(int i = 0; i < nelem; i++) 
     {
 		double sumnode=0;
@@ -536,7 +568,7 @@ double ** connect::Elem2Area(int **Elem2Node, double **coord)
 }
 
 
-double ** connect::Elem2Normal(int **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_y, string choix)
+double ** connect::Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_y, string choix)
 {
     nnode = 3; // aussi = Nbr face par elem
     matrix mat;

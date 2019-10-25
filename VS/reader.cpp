@@ -111,6 +111,7 @@ void Reader::read_file(string File_Name)
 					marknl = 2 * nmark; //2 lines per marker for marker name and elemn
 					markername = new string[nmark];
 					markerdata = new unsigned**[nmark];
+					melemnv = matrix.generateMatrix(nmark, 1);
 					markn = 0;
 					step = 0;
 					continue;
@@ -125,9 +126,7 @@ void Reader::read_file(string File_Name)
 					}
 					else if (step == 1) {
 						markelemn = Readmarkelemn(line);
-						if (markn == 0) {
-							ffelemn = markelemn;
-						}
+						*(int*)melemnv[markn] = markelemn;
 						markerdata[markn] = matrix.generateMatrix_unsigned(markelemn,2);  // 2 since we are in 2D and boundaries will always be lines
 						marknl += markelemn; //add nelem since each elem has 1 line
 						imen = 0; //counter for marker element number used in FillMarker
@@ -150,11 +149,14 @@ void Reader::read_file(string File_Name)
 								inpoel1_wf[ielem][inode] = inpoel1[ielem][inode];
 							}
 						}
-						for (int ifc = 0; ifc < ffelemn; ifc++) {
-							*(int*)vtk_wf[nelem + ifc] = 3;
-							for (int j = 0; j < 2; j++) {
-								inpoel1_wf[nelem + ifc][0] = markerdata[0][ifc][0];
-								inpoel1_wf[nelem + ifc][1] = markerdata[0][ifc][1];
+						int imelem = 0;
+						for (int k = 0; k < nmark; k++) {
+							for (int ifc = 0; ifc < *(int*)melemnv[k]; ifc++) {
+								*(int*)vtk_wf[nelem + imelem] = 3;
+								for (int j = 0; j < 2; j++) {
+									inpoel1_wf[nelem + imelem][j] = markerdata[k][ifc][j];
+								}
+								imelem++;
 							}
 						}
 					}
@@ -248,10 +250,14 @@ void Reader::FillE2P_VTK(const char* cline)
 			//cout << "j";cout << j;cout << "\n";
 			inpoel1[elem][j - 1] = c + 1;
 		}
+		if (*(int*)vtk[elem] == 5) {
+			if (j == 4) {
+				inpoel1[elem][j - 1] = inpoel1[elem][0];
+			}
+		}
 		j++;
-	}
-	if (j == 4) {
-		inpoel1[elem][j-1] = inpoel1[elem][0];
+		
+		
 	}
 	elem++;
 }

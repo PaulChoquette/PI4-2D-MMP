@@ -70,7 +70,8 @@ class Reader {
 		unsigned lineNelem;
 		unsigned poinlinen;
 		unsigned marklinen;
-		unsigned marknl, melem, markn, markelemn, ffelemn;
+		unsigned marknl, melem, markn, markelemn;
+		int** melemnv;
 		string* markername;
 		unsigned step;
 		unsigned*** markerdata;

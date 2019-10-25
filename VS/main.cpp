@@ -16,8 +16,8 @@ int main()
 	FileContents.nnodemax = 4;
 
 	//ifstream meshfile("naca0012_129x129_1B_JAMESON.su2");
-	string File_Name = "square.su2";
-	//string File_Name = "naca0012_129x129_1B_JAMESON.su2";
+	//string File_Name = "square.su2";
+	string File_Name = "naca0012_129x129_1B_JAMESON.su2";
 
 	if (FileContents.OpenFile(File_Name))
 	{
@@ -57,7 +57,7 @@ int main()
 //////////////////////-------------------------------------------------------------------------//////////////////////
     connect maillage;
     maillage.npoin = FileContents.npoin;
-    maillage.nelem = FileContents.nelem+FileContents.ffelemn;
+    maillage.nelem = FileContents.nelem+FileContents.totalmarken;
     //maillage.nnode = FileContents.nnode;
 	maillage.vtk = FileContents.vtk_wf;
     maillage.poinperFace = 2;
@@ -182,12 +182,23 @@ int main()
 
 //////////////////////-------------------------------------------------------------------------//////////////////////
 //////////////////////-------------------------------------------------------------------------//////////////////////
+	double** SumVector = matrix.generateMatrix_double(FileContents.nelem, 1);
+	for (int i = 0; i < FileContents.nelem; i++) {
+		int znfael = maillage.Get_nnode(FileContents.vtk, i);
+		for (int j = 0; j <znfael ; j++) {
+			if (j == 0) {
+				*(double*)SumVector[i] = 0.0;
+			}
+			*(double*)SumVector[i] = *(double*)SumVector[i] + Elem2Vec_x[i][j] + Elem2Vec_y[i][j];
+		}
+	}
+
 	Writer Output;
 	Output.npoin = FileContents.npoin;
 	Output.nelem = FileContents.nelem;
 	Output.nnodemax = FileContents.nnodemax;
-	string varname[3] = {"X","Y","Area"};
-	Output.Write_Output("test.dat", 3,varname, inpoel, coord, Elem2Area);
+	string varname[3] = {"X","Y","SUmVec"};
+	Output.Write_Output("test.dat", 3,varname, FileContents.inpoel1, coord, SumVector);
 //////////////////////-------------------------------------------------------------------------//////////////////////
 //////////////////////-------------------------------------------------------------------------//////////////////////
  

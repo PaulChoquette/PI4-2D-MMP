@@ -15,9 +15,8 @@ int main()
 	matrix matrix;
 	FileContents.nnodemax = 4;
 
-	//ifstream meshfile("naca0012_129x129_1B_JAMESON.su2");
-	//string File_Name = "square.su2";
-	string File_Name = "naca0012_129x129_1B_JAMESON.su2";
+	string File_Name = "square.su2";
+	//string File_Name = "naca0012_129x129_1B_JAMESON.su2";
 
 	if (FileContents.OpenFile(File_Name))
 	{
@@ -32,10 +31,6 @@ int main()
 	cout << "--- Coord ---";cout << "\n";
 	matrix.printMatrix_double(FileContents.coord,FileContents.npoin,FileContents.ndime);
 
-	//cout << "--- MARKER ---"; cout << "\n";
-	//for (int i = 0; i < FileContents.nmark; i++) {
-	//	cout << FileContents.markername[i] << "\n";
-	//}
     cout << "--- NELEM ";cout << "  :  ";
     cout << FileContents.nelem;cout << "			";
 	cout << "--- Position ";cout << "  :  ";
@@ -46,9 +41,6 @@ int main()
 	cout << "--- Position ";cout << "  :  ";
     cout << FileContents.poinlinen;cout << "\n";
 
-	cout << "--- NNODE ";cout << "   :  ";
-	cout << FileContents.nnode;cout << "\n";
-
 	cout << "--- ndime ";cout << "   :  ";
 	cout << FileContents.ndime;cout << "\n";
 
@@ -58,7 +50,6 @@ int main()
     connect maillage;
     maillage.npoin = FileContents.npoin;
     maillage.nelem = FileContents.nelem+FileContents.totalmarken;
-    //maillage.nnode = FileContents.nnode;
 	maillage.vtk = FileContents.vtk_wf;
     maillage.poinperFace = 2;
     maillage.nfaelmax = 4;
@@ -66,44 +57,9 @@ int main()
 	maillage.NbNdPerFace = 2; //OK parce qu'on est en 2D pour l'instant...
     maillage.ddl = 2;
 ////////////////////////////////////////////////////////////////////
-   // int inpoel_[8][3] = {{1, 2, 4}, {2, 5, 4}, {2, 3, 5}, {3, 6, 5}, {4, 5, 7}, {5, 8, 7}, {5, 6, 8}, {6, 9, 8}};
-//    int lpofa_[2][3] = {{1, 2, 3},{2, 3, 1}};
- //   int lnofa_[3]= {2, 2, 2};
-    double coord_[9][2] = {{0, 0}, {1, 0},{2, 0},{0, 1}, {1, 1},{2, 1},{0, 2},{1, 2},{2, 2}};
-////////////////////////////////////////////////////////////////////
     unsigned **inpoel = FileContents.inpoel1_wf; // matrix.generateMatrix(maillage.nelem, maillage.nnode); 											//   int **lnofa = matrix.generateMatrix(maillage.nfael,1); 
 //    int **lpofa = matrix.generateMatrix(maillage.poinperFace, maillage.nfael); 
     double **coord = FileContents.coord; // matrix.generateMatrix_double(maillage.npoin, 2); 
-////////////////////////////////////////////////////////////////////
-/*
-    for(int i = 0; i < maillage.nelem; i++) 
-    {
-        for(int j = 0; j < maillage.nnode; j++) 
-        {
-            inpoel[i][j] = inpoel_[i][j];
-        }
-    } 
-
-    for(int i=0; i<3; i++)
-    {
-        *(int*)lnofa[i] = lnofa_[i];
-    }
-    for(int i=0; i<maillage.poinperFace; i++)
-    {
-        for(int j=0; j<maillage.nfael; j++)
-        {
-            lpofa[i][j] = lpofa_[i][j];
-        }
-    }
-
-    for(int i = 0; i < maillage.npoin; i++) 
-    {
-        for(int j = 0; j < 2; j++) 
-        {
-            coord[i][j] = coord_[i][j];
-        }
-    } 
-*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     cout << ".....";cout << "\n";
     int **esuel = maillage.init(inpoel,"esuel");
@@ -162,24 +118,69 @@ int main()
     matrix.printMatrix_double(Elem2Normal_y,maillage.nelem, maillage.nnodemax);  
 
     cout << "elem2face";cout << "\n";
-    //matrix.printMatrix(elem2face,maillage.nelem,maillage.nfaelmax);
+    matrix.printMatrix(elem2face,maillage.nelem,maillage.nfaelmax);
 
     cout << " --- Elem2Normal --- ";cout << "\n";
     matrix.printXY_double(Elem2Normal_x,Elem2Normal_y,maillage.nelem, maillage.nnodemax);
 
+    double **Face2Normal_u = maillage.Face2Normal(Elem2Normal_x,Elem2Normal_y,elem2face,"x");
+    double **Face2Normal_v = maillage.Face2Normal(Elem2Normal_x,Elem2Normal_y,elem2face,"y");
+    cout << " --- Face2Normal --- ";cout << "\n";
+    matrix.printXY_double(Face2Normal_u,Face2Normal_v,maillage.FaceNumber, 1);
+
+    //cout << " --- maillage.vtk --- ";cout << "\n";
+    //matrix.printMatrix(maillage.vtk,maillage.nelem, 1);
+
 //////////////////////-------------------------------------------------------------------------//////////////////////
 //////////////////////-------------------------------------------------------------------------//////////////////////
-    primitive prim;
-    prim.NbrPrimitive = 4;
-    prim.rho_0 = 0.01;
-    prim.P_0 = 1000;
-    prim.u_0 = 1;
-    prim.v_0 = 1;
-    double **PrimVec = prim.init_0(prim.rho_0,prim.P_0,prim.u_0,prim.v_0,prim.NbrPrimitive,maillage.nelem);
-    cout << " --- PrimVec --- ";cout << "\n";
-    //matrix.printMatrix_double(PrimVec,maillage.nelem, prim.NbrPrimitive);  
+    mesh mesh_;
+    mesh_.elem2elem = esuel;
+    mesh_.nbFace = maillage.FaceNumber;
+    mesh_.Face2Normal_u = Face2Normal_u;
+    mesh_.Face2Normal_v = Face2Normal_v;
+    mesh_.face2elem = face2elem;
+    mesh_.NbrPrimitive = 4;
+    mesh_.nelem = maillage.nelem;
+    mesh_.nbNode = FileContents.npoin;
+    mesh_.rho_0 = 0.01;
+    mesh_.P_0 = 1000;
+    mesh_.u_0 = 1;
+    mesh_.v_0 = 1;
+//
+    mesh_.primitive_init(mesh_.rho_0,mesh_.P_0,mesh_.u_0,mesh_.v_0,mesh_.NbrPrimitive);
+//
+    cout << "mesh_.nelem : ";cout << mesh_.nelem;cout << "\n";
+    //cout << "mesh_.NbrPrimitive : ";cout << mesh_.NbrPrimitive;cout << "\n";
+    //cout << "primitive_0";cout << "\n";
+    //cout << "- Rho - P - U - V -";cout << "\n";
+    //matrix.printMatrix_double(mesh_.primitive_0,mesh_.nelem,mesh_.NbrPrimitive);
+//  
+    mesh_.saveConservative();
+    mesh_.roe_compute();
 
+    mesh_.savePrimitive();
+//
+    cout << " --- massFlux_ --- ";cout << "\n";
+    matrix.printMatrix_double(mesh_.massFlux_,mesh_.nbFace, 1); 
 
+    //cout << " --- momentumFlux_x --- ";cout << "\n";
+    //matrix.printMatrix_double(mesh_.momentumFlux_x,mesh_.nbFace, 1); 
+
+    //cout << " --- momentumFlux_y --- ";cout << "\n";
+    //matrix.printMatrix_double(mesh_.momentumFlux_y,mesh_.nbFace, 1); 
+
+    //cout << " --- energyFlux_ --- ";cout << "\n";
+    //matrix.printMatrix_double(mesh_.energyFlux_,mesh_.nbFace, 1);  
+
+    //cout << " --- saveConservative --- ";cout << "\n";
+    //matrix.printMatrix_double(mesh_.conservative1_,mesh_.nelem, 1);
+
+    //cout << " --- savePrimitive --- ";cout << "\n";
+    //matrix.printMatrix_double(mesh_.density_,mesh_.nelem, 1);
+
+    cout << " --- Elem_flux --- ";cout << "\n";
+    matrix.printMatrix_double(mesh_.Elem_flux,mesh_.nelem, 4);
+    
 //////////////////////-------------------------------------------------------------------------//////////////////////
 //////////////////////-------------------------------------------------------------------------//////////////////////
 	double** SumVector = matrix.generateMatrix_double(FileContents.nelem, 1);

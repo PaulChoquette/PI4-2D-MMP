@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <iostream>
-#include <sstream>
+#include <sstream> 
 #include <fstream>
 #include <vector>
 #include <algorithm> 
@@ -122,34 +122,62 @@ class connect
         double ** Elem2Vec_y(unsigned **Elem2Node,double **coord);
         double ** Elem2Area(unsigned **Elem2Node,double **coord);
         double ** Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_Y, string choix);
-        
-
+        double ** Face2Normal(double **Elem2Normal_x, double **Elem2Normal_y, int **elem2face, string choix);
 };
 
-class primitive
+class mesh
 {
     public:
         // Attributs
+        int nelem;
+        int nbFace;
+        int nbNode;
         double rho_0, P_0, u_0, v_0;
         int NbrPrimitive;
+
+        double **primitive_0;
+        int **face2elem;
+        int **NbrFace_perElem;
+        int **elem2elem;
+        double **Face2Normal_u;
+        double **Face2Normal_v;
+        double **massFlux_;
+        double **momentumFlux_x;
+        double **momentumFlux_y;
+        double **energyFlux_;
+
+        double **density_; 
+        double **pressure_;
+        double **velocity_x; 
+        double **velocity_y;
+        double **conservative1_; 
+        double **conservative2_;
+        double **conservative3_; 
+        double **conservative4_;
+
+        double **Elem_flux;
+
+
+        //double roL, roR, uL, uR, vL, vR, pL, pR, cL, cR, hL, hR, ML, MR, MpL, ppL, MmR, pmR, MnAvg;
+        double V_Roe, sqrtRoL, sqrtRoR, roRoe, uRoe, vRoe, hRoe, qRoe2, cRoe2, cRoe, harten, lambda1,lambda2,lambda3;
+        double coef1, f11, f12, f13, f14, coef2, f21, f22, f23, f24;
+	    double velocity1, velocity2, pressure1, pressure2, density1, density2;
+        double deltaRo, deltaU, deltaP, deltaV, deltaV_;
+        double coef3, f31,f32,f33, f34,roAvg,uAvg, vAvg,pAvg, V_avg;
+        
+        double massFlux_dob;  
+        double momentumFlux_X_dob;
+        double momentumFlux_Y_dob;  
+        double energyFlux_dob; 
+
         // Method
-        double ** init_0(double rho_0,double P_0,double u_0,double v_0, int NbrPrimitive, int nelem);
+        void primitive_init(double rho_0,double P_0,double u_0,double v_0, int NbrPrimitive);
+        void roe_compute();
 
-
-
-};
-
-
-class roe
-{
-    public:
-        // Attributs
-
-        // Method
-        void compute();
-
-
-
+        string Get_cell_type(int Elem_number);
+        double Get_LocalMach(int Face_number,string choix);
+        void saveConservative();
+        void savePrimitive();
 };
 
 class Writer
@@ -161,4 +189,5 @@ class Writer
 		//Methods
 		void Write_Output(string filename, int nvar,string* varname, unsigned** inpoel,double ** coord, double ** vararr);
 };
+
 

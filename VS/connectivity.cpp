@@ -1,5 +1,5 @@
 #include <iostream>
-#include <vector> 
+#include <vector>  
 #include <algorithm>
 #include <cmath> 
 #include <functional> // std::divides 
@@ -119,15 +119,18 @@ int connect::Get_nfael(int** vtk, int ielem)
 	matrix mat;
 	int infael;
 	int** lnofa;
-	if (*(int*)vtk[ielem] == 5) {
+	if (*(int*)vtk[ielem] == 5) 
+    {
 		infael = 3;
 		return infael;
 	}
-	else if (*(int*)vtk[ielem] == 9) {
+	else if (*(int*)vtk[ielem] == 9) 
+    {
 		infael = 4;
 		return infael;
 	}
-	else if (*(int*)vtk[ielem] == 3) {
+	else if (*(int*)vtk[ielem] == 3) 
+    {
 		infael = 1;
 		return infael;
 	}
@@ -582,6 +585,7 @@ double ** connect::Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem
         {
             double Y = 1.0;
             double X = 1.0;
+            /*
             if (Elem2Vec_y[i][k] == 0)
             {
                 Y = 1.0;
@@ -594,6 +598,17 @@ double ** connect::Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem
             double norme = sqrt(X*X + Y*Y);
             Elem2Normal_x[i][k] = X/norme;
             Elem2Normal_y[i][k] = Y/norme;
+            */
+
+            
+            long double phi = -	1.57079632679489661923;
+            X = Elem2Vec_x[i][k]*cos(phi) - Elem2Vec_y[i][k]*sin(phi);
+            Y = Elem2Vec_x[i][k]*sin(phi) + Elem2Vec_y[i][k]*cos(phi);
+
+            double norme = sqrt(X*X + Y*Y);
+            Elem2Normal_x[i][k] = X/norme;
+            Elem2Normal_y[i][k] = Y/norme;
+            
         }
     }
     
@@ -608,6 +623,37 @@ double ** connect::Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem
     return 0;
 }
 
+double ** connect::Face2Normal(double **Elem2Normal_x, double **Elem2Normal_y, int **elem2face, string choix)
+{
+    matrix mat;
+    //cout << "\nFaceNumber";cout << FaceNumber;cout << "\n";  OKK
+    double ** Face2Normal_u = mat.generateMatrix_double(FaceNumber, 1);
+    double ** Face2Normal_v = mat.generateMatrix_double(FaceNumber, 1);
+    //mat.printMatrix_double(Face2Normal_u,FaceNumber,1);
+    for(int i=0; i<nelem; i++)
+    {   
+        NbNdPerElem = Get_nfael(vtk, i);
+        for (int j=0; j<NbNdPerElem; j++)
+        {
+            int Elem_Number = i;
+            int Face_Number = elem2face[i][j] - 1;
+            if (Face2Normal_u[Face_Number][0] == 0)
+            {
+                Face2Normal_u[Face_Number][0] = Elem2Normal_x[Elem_Number][j];
+                Face2Normal_v[Face_Number][0] = Elem2Normal_y[Elem_Number][j];
+            }
+        }
+    }
+    if (choix == "x")
+    {
+        return Face2Normal_u;
+    }
+    else if (choix == "y")
+    {
+        return Face2Normal_v;
+    }
+    return 0;
+}
 
 
 

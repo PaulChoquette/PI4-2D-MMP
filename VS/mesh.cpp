@@ -149,7 +149,13 @@ void mesh::roe_compute()
         V_Roe = uRoe*n_u + vRoe*n_v;
         double V_R = uR*n_u + vR*n_v;
         double V_L = uL*n_u + vL*n_v;
-        double V_avg = 0.5*(V_R + V_L);
+        double roAvg = 0.5*(roR + roL);
+        double pAVG = 0.5*(pR + pL);
+        double E_AVG = 0.5*(eR + eL);
+        double uAVG = 0.5*(uL + uR); 
+        double vAVG = 0.5*(vL + vR); 
+        //double V_avg = 0.5*(V_R + V_L);
+        double V_avg = uAVG*n_u + vAVG*n_v;
         deltaV_  = V_R-V_L;
         deltaP = pR-pL;
 
@@ -203,11 +209,6 @@ void mesh::roe_compute()
         momentumFlux_Y_dob = 0.5* ( (roL*vL*V_L + n_v*pL) + (roR*vR*V_R + n_v*pR) );     //V_avg*vAvg*roAvg + n_v*pAvg;
         energyFlux_dob = 0.5* ( roL*hL*V_L + roR*hR*V_R );  //V_avg*H_avg*roAvg; //(0.5 * uAvg*uAvg * roAvg + pAvg/(Gamma -1.0) + pAvg);
 */
-        double roAvg = 0.5*(roR - roL);
-        double pAVG = 0.5*(pR - pL);
-        double uAVG = 0.5*(uR - uL);
-        double vAVG = 0.5*(vR - vL);
-        double E_AVG = 0.5*(eR - eL);
         massFlux_dob = roAvg*V_avg;
         momentumFlux_X_dob = roAvg*uAVG*V_avg + n_u*pAVG;     //V_avg*uAvg*roAvg + n_u*pAvg;
         momentumFlux_Y_dob = roAvg*vAVG*V_avg + n_v*pAVG;     //V_avg*vAvg*roAvg + n_v*pAvg;
@@ -238,16 +239,24 @@ void mesh::roe_compute()
     {
         int Elem_L = face2elem[j][0] - 1;
         int Elem_R = face2elem[j][1] - 1;
+        //cout << "Elem_L : ";cout << Elem_L;cout << "\n";
+        //cout << "Elem_R : ";cout << Elem_R;cout << "\n";
+        double n_u = abs(Face2Normal_u[j][0]);
+        double n_v = abs(Face2Normal_v[j][0]); 
         int Face_num = j;
-        Elem_flux[Elem_L][0] += massFlux_[Face_num][0];
-        Elem_flux[Elem_L][1] += momentumFlux_x[Face_num][0];
-        Elem_flux[Elem_L][2] += momentumFlux_y[Face_num][0];
-        Elem_flux[Elem_L][3] += energyFlux_[Face_num][0];
+        double face_vec_x = (Face2Normal_u[j][0]);
+        double face_vec_y = (Face2Normal_v[j][0]);
+        //cout << "face_vec_x : ";cout << face_vec_x;cout << "\n";
+        //cout << "face_vec_y : ";cout << face_vec_y;cout << "\n";
+        Elem_flux[Elem_L][0] += (n_u + n_v)*massFlux_[Face_num][0];
+        Elem_flux[Elem_L][1] += (n_u + n_v)*momentumFlux_x[Face_num][0];
+        Elem_flux[Elem_L][2] += (n_u + n_v)*momentumFlux_y[Face_num][0];
+        Elem_flux[Elem_L][3] += (n_u + n_v)*energyFlux_[Face_num][0];
 
-        Elem_flux[Elem_R][0] -= massFlux_[Face_num][0];
-        Elem_flux[Elem_R][1] -= momentumFlux_x[Face_num][0];
-        Elem_flux[Elem_R][2] -= momentumFlux_y[Face_num][0];
-        Elem_flux[Elem_R][3] -= energyFlux_[Face_num][0];
+        Elem_flux[Elem_R][0] -= (n_u + n_v)*massFlux_[Face_num][0];
+        Elem_flux[Elem_R][1] -= (n_u + n_v)*momentumFlux_x[Face_num][0];
+        Elem_flux[Elem_R][2] -= (n_u + n_v)*momentumFlux_y[Face_num][0];
+        Elem_flux[Elem_R][3] -= (n_u + n_v)*energyFlux_[Face_num][0];
         //mat.printMatrix_double(Elem_flux,8, 4);
     }
 

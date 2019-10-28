@@ -5,7 +5,7 @@
 #include <cctype>
 #include <algorithm>
 #include "main.h"
- 
+  
 using namespace std;
 
 

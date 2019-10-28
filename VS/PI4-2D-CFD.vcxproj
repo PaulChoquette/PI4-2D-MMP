@@ -99,11 +99,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="connectivity.cpp" />
+    <ClCompile Include="mesh.cpp" />
     <ClCompile Include="reader.cpp" />
     <ClCompile Include="function.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="primitive.cpp" />
-    <ClCompile Include="roe.cpp" />
     <ClCompile Include="writer.cpp" />
   </ItemGroup>
   <ItemGroup>

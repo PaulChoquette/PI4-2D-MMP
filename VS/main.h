@@ -73,6 +73,7 @@ class Reader {
 		unsigned marknl, melem, markn, markelemn;
 		int** melemnv;
 		string* markername;
+		string* celltype;
 		unsigned step;
 		unsigned*** markerdata;
 		unsigned imen, totalmarken;
@@ -87,7 +88,6 @@ class Reader {
 		void FillE2P_VTK(const char* cline);
 		void FillMarker(const char* cline, int markn);
 		string FillMarkTag(const string& line);
-
 		unsigned Readnpoin(const string& line);
 		double ** FillCoord(const char* cline);
 
@@ -117,7 +117,6 @@ class connect
 		int Get_nnode(int** vtk, int ielem);
 		int Get_nfael(int** vtk, int ielem);
         int ** Face2Vec(int **elem2face, int **face2node, double **coord);
-        int ** Elem2Node(int **elem2face,int **face2node);
         double ** Elem2Vec_x(unsigned **Elem2Node,double **coord);
         double ** Elem2Vec_y(unsigned **Elem2Node,double **coord);
         double ** Elem2Area(unsigned **Elem2Node,double **coord);
@@ -170,11 +169,12 @@ class mesh
         double momentumFlux_Y_dob;  
         double energyFlux_dob; 
 
+		string* celltype;
+
         // Method
         void primitive_init(double rho_0,double P_0,double u_0,double v_0, int NbrPrimitive);
         void roe_compute();
 
-        string Get_cell_type(int Elem_number);
         double Get_LocalMach(int Face_number,string choix);
         void saveConservative();
         void savePrimitive();

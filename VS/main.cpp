@@ -15,7 +15,7 @@ int main()
 	matrix matrix;
 	FileContents.nnodemax = 4;
 
-	string File_Name = "square.su2";
+	string File_Name = "square_tube.su2";
 	//string File_Name = "naca0012_129x129_1B_JAMESON.su2";
 
 	if (FileContents.OpenFile(File_Name))
@@ -142,6 +142,7 @@ int main()
     mesh_.NbrPrimitive = 4;
     mesh_.nelem = maillage.nelem;
     mesh_.nbNode = FileContents.npoin;
+	mesh_.celltype = FileContents.celltype;
     mesh_.rho_0 = 0.01;
     mesh_.P_0 = 1000;
     mesh_.u_0 = 1;

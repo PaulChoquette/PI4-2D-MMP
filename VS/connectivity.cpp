@@ -453,52 +453,6 @@ int ** connect::Face2Vec(int **elem2face, int **face2node, double **coord)
     return Face2Vec;
 }
 
-int ** connect::Elem2Node(int **elem2face,int **face2node) 
-{
-    matrix mat;
-    int **Elem2Node = mat.generateMatrix(nelem, nnodemax); 
-    for(int i = 0; i < nelem; i++) 
-    {
-		nnode = Get_nnode(vtk, i);
-        //cout << " ....... ";cout << "\n";
-        for(int k = 0; k < nnode; k++)
-        {
-            if (Elem2Node[i][k] == face2node[elem2face[i][k] - 1][0] || k == 0)
-            {
-                Elem2Node[i][k] = face2node[elem2face[i][k] - 1][0];
-                if (k<nnode-1)
-                {
-                    Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][1];
-                }
-            }
-            else if (Elem2Node[i][k] == face2node[elem2face[i][k] - 1][1])
-            {
-                Elem2Node[i][k] = face2node[elem2face[i][k] - 1][1];
-                if (k<nnode-1)
-                {
-                    Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][0];
-                }
-            }
-            else if (Elem2Node[i][k-1] == face2node[elem2face[i][k] - 1][1])
-            {
-                Elem2Node[i][k] = face2node[elem2face[i][k] - 1][0];
-                if (k<nnode-1)
-                {
-                    Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][1];
-                }
-            }
-            else
-            {
-                Elem2Node[i][k] = face2node[elem2face[i][k] - 1][1];
-                if (k<nnode-1)
-                {
-                    Elem2Node[i][k + 1] = face2node[elem2face[i][k] - 1][0];
-                }
-            }
-        }
-    }
-    return Elem2Node;
-}
 
 double ** connect::Elem2Vec_x(unsigned **Elem2Node,double **coord)
 {

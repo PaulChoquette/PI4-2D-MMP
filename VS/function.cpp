@@ -63,6 +63,12 @@ int ** matrix::generateMatrix(int rows, int cols)
     {
         mat[i] = new int[cols];
     }
+
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			mat[i][j] = 0;
+		}
+	}
     //return the pointer to pointer
     return mat;
 }
@@ -76,6 +82,11 @@ double ** matrix::generateMatrix_double(int rows, int cols)
     {
         mat[i] = new double[cols];
     }
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			mat[i][j] = 0.0;
+		}
+	}
     //return the pointer to pointer
     return mat;
 }
@@ -88,6 +99,11 @@ unsigned** matrix::generateMatrix_unsigned(unsigned rows, unsigned cols)
 	for (int i = 0; i < rows; i++)
 	{
 		mat[i] = new unsigned[cols];
+	}
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			mat[i][j] = 0;
+		}
 	}
 	//return the pointer to pointer
 	return mat;

@@ -25,36 +25,33 @@ void mesh::primitive_init(double rho_0,double P_0,double u_0,double v_0, int Nbr
         mat[i][1] = P_0;
         mat[i][2] = u_0;
         mat[i][3] = v_0;
-        /*
         
-        string cell_type = Get_cell_type(i);
-        if (cell_type == "center")
+
+        if (celltype[i] == "center")
         {
             mat[i][0] = rho_0;
             mat[i][1] = P_0;
             mat[i][2] = u_0;
             mat[i][3] = v_0;
         }
-        if (cell_type == "FarField")
+        else if (celltype[i] == "farfield")
         {
             mat[i][0] = rho_0;
             mat[i][1] = P_0;
             mat[i][2] = u_0;
             mat[i][3] = v_0;
         }
-        if (cell_type == "NoSlipWall")
+        else if (celltype[i] == "slipwall")
         {
             double n_u = abs(Face2Normal_u[i][0]);
             double n_v = abs(Face2Normal_v[i][0]);
-            double n_u = ;
-            double n_v = ;
             int Elem_voisin = elem2elem[i][0];
             mat[i][0] = mat[Elem_voisin][0];
             mat[i][1] = mat[Elem_voisin][1];
             mat[i][2] = mat[Elem_voisin][2] - 2*(mat[Elem_voisin][2]*n_u + mat[Elem_voisin][3]*n_v)*n_u;
             mat[i][3] = mat[Elem_voisin][3] - 2*(mat[Elem_voisin][2]*n_u + mat[Elem_voisin][3]*n_v)*n_v;
         }
-        */
+        
     }
     primitive_0 = mat;
     density_ = matrice.generateMatrix_double(nelem, 1); 

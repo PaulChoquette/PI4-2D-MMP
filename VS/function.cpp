@@ -22,6 +22,7 @@ void matrix::printXY_double(double ** matX, double ** matY, int rows, int cols)
     }
 }
 
+
 void matrix::printMatrix_double(double ** mat, int rows, int cols) 
 {
     for(int i = 0; i < rows; i++) {

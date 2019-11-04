@@ -22,7 +22,7 @@ void Writer::Write_Output(string filename, int nvar,string* varname, unsigned** 
 		outfile << "ZONE T=\"Yeethaw\"\n";
 		outfile << "Nodes=" << npoin << ", " << "Elements=" << nelem << ", " << "ZONETYPE=FEQuadrilateral\n";
 		outfile << "DATAPACKING=BLOCK\n";
-		outfile << "VARLOCATION=([3]=CELLCENTERED) \n";
+		outfile << "VARLOCATION=([3,4,5,6]=CELLCENTERED) \n";
 		//write out variable data
 		
 		for (int ivar = 0; ivar < nvar; ivar++) {

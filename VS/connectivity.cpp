@@ -435,10 +435,10 @@ int ** connect::init(unsigned **inpoel, string choix)
 
 
 
-int ** connect::Face2Vec(int **elem2face, int **face2node, double **coord) 
+double ** connect::Face2Vec(int **elem2face, int **face2node, double **coord) 
 {
     matrix mat;
-    int **Face2Vec = mat.generateMatrix(FaceNumber, nnodemax); 
+    double **Face2Vec = mat.generateMatrix_double(FaceNumber, nnodemax); 
     for(int i = 0; i < nelem; i++) 
     {
 		nfael = Get_nfael(vtk, i);
@@ -456,46 +456,67 @@ int ** connect::Face2Vec(int **elem2face, int **face2node, double **coord)
 
 double ** connect::Elem2Vec_x(unsigned **Elem2Node,double **coord)
 {
-    nnode = 3; // aussi = Nbr face par elem
+    nfael = 3; // aussi = Nbr face par elem
     matrix mat;
-    double **Elem2Vec_x = mat.generateMatrix_double(nelem, nnodemax); 
+    double **Elem2Vec_x = mat.generateMatrix_double(nelem, nfaelmax); 
     for(int i = 0; i < nelem; i++) 
     {
-		nnode = Get_nnode(vtk, i);
-        for(int k = 0; k < nnode; k++)
-        {
-            if (k == nnode-1)
-            {
-                Elem2Vec_x[i][k] = coord[Elem2Node[i][0] - 1][0] - coord[Elem2Node[i][k] - 1][0];
-            }
-            else
-            {
-                Elem2Vec_x[i][k] = coord[Elem2Node[i][k+1] - 1][0] - coord[Elem2Node[i][k] - 1][0];
-            }
-        }
+		nfael = Get_nfael(vtk, i);
+		if (nfael == 1) {
+			Elem2Vec_x[i][0] = coord[Elem2Node[i][1] - 1][0] - coord[Elem2Node[i][0] - 1][0];
+		}
+		else {
+			for (int k = 0; k < nfael; k++)
+			{
+				if (k == nfael - 1)
+				{
+					Elem2Vec_x[i][k] = coord[Elem2Node[i][0] - 1][0] - coord[Elem2Node[i][k] - 1][0];
+				}
+				else
+				{
+					Elem2Vec_x[i][k] = coord[Elem2Node[i][k + 1] - 1][0] - coord[Elem2Node[i][k] - 1][0];
+				}
+			}
+		}
     }
     return Elem2Vec_x;
+}
+
+void connect::Face2Area_compute(double **Face2Vec)
+{
+    matrix mat;
+    Face2Area = mat.generateMatrix_double(FaceNumber, 1); 
+    for(int i = 0; i < FaceNumber; i++) 
+    {
+        
+        Face2Area[i][0] = sqrt(Face2Vec[i][0]*Face2Vec[i][0] + Face2Vec[i][1]*Face2Vec[i][1]);
+    }
 }
 
 
 double ** connect::Elem2Vec_y(unsigned **Elem2Node,double **coord)
 {
     matrix mat;
-    double **Elem2Vec_y = mat.generateMatrix_double(nelem, nnodemax); 
+    double **Elem2Vec_y = mat.generateMatrix_double(nelem, nfaelmax); 
     for(int i = 0; i < nelem; i++) 
     {
-		nnode = Get_nnode(vtk, i);
-        for(int k = 0; k < nnode; k++)
-        {
-            if (k == nnode-1)
-            {
-                Elem2Vec_y[i][k] = coord[Elem2Node[i][0] - 1][1] - coord[Elem2Node[i][k] - 1][1];
-            }
-            else
-            {
-                Elem2Vec_y[i][k] = coord[Elem2Node[i][k+1] - 1][1] - coord[Elem2Node[i][k] - 1][1];
-            }
-        }
+		nfael = Get_nfael(vtk, i);
+		if (nfael == 1) {
+			Elem2Vec_y[i][0] = coord[Elem2Node[i][1] - 1][1] - coord[Elem2Node[i][0] - 1][1];
+		}
+		else {
+			for (int k = 0; k < nfael; k++)
+			{
+				if (k == nfael - 1)
+				{
+					Elem2Vec_y[i][k] = coord[Elem2Node[i][0] - 1][1] - coord[Elem2Node[i][k] - 1][1];
+				}
+				else
+				{
+					Elem2Vec_y[i][k] = coord[Elem2Node[i][k + 1] - 1][1] - coord[Elem2Node[i][k] - 1][1];
+				}
+			}
+		}
     }
     return Elem2Vec_y;
 }
@@ -527,15 +548,15 @@ double ** connect::Elem2Area(unsigned **Elem2Node, double **coord)
 
 double ** connect::Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_y, string choix)
 {
-    nnode = 3; // aussi = Nbr face par elem
+    nfael = 3; // aussi = Nbr face par elem
     matrix mat;
-    double **Elem2Normal_x = mat.generateMatrix_double(nelem, nnodemax);
-    double **Elem2Normal_y = mat.generateMatrix_double(nelem, nnodemax); 
+    double **Elem2Normal_x = mat.generateMatrix_double(nelem, nfaelmax);
+    double **Elem2Normal_y = mat.generateMatrix_double(nelem, nfaelmax); 
 
     for(int i = 0; i < nelem; i++)
     {   
-		nnode = Get_nnode(vtk, i);
-        for(int k = 0; k < nnode; k++)
+		nfael = Get_nfael(vtk, i);
+        for(int k = 0; k < nfael; k++)
         {
             double Y = 1.0;
             double X = 1.0;
@@ -608,7 +629,6 @@ double ** connect::Face2Normal(double **Elem2Normal_x, double **Elem2Normal_y, i
     }
     return 0;
 }
-
 
 
 

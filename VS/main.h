@@ -107,6 +107,8 @@ class connect
         int NbNdPerElem;
         int ddl;
 		int** vtk;
+
+        double **Face2Area;
         // Pointeur
         
 
@@ -116,12 +118,13 @@ class connect
 		int ** Get_lnofa(int** vtk, int ielem);
 		int Get_nnode(int** vtk, int ielem);
 		int Get_nfael(int** vtk, int ielem);
-        int ** Face2Vec(int **elem2face, int **face2node, double **coord);
+        double ** Face2Vec(int **elem2face, int **face2node, double **coord);
         double ** Elem2Vec_x(unsigned **Elem2Node,double **coord);
         double ** Elem2Vec_y(unsigned **Elem2Node,double **coord);
         double ** Elem2Area(unsigned **Elem2Node,double **coord);
         double ** Elem2Normal(unsigned **Elem2Node,double **coord,double **Elem2Vec_x,double **Elem2Vec_Y, string choix);
         double ** Face2Normal(double **Elem2Normal_x, double **Elem2Normal_y, int **elem2face, string choix);
+        void Face2Area_compute(double **Face2Vec);
 };
 
 class mesh
@@ -129,6 +132,7 @@ class mesh
     public:
         // Attributs
         int nelem;
+        int nelem_REAL;
         int nbFace;
         int nbNode;
         double rho_0, P_0, u_0, v_0;
@@ -138,12 +142,15 @@ class mesh
         int **face2elem;
         int **NbrFace_perElem;
         int **elem2elem;
-        double **Face2Normal_u;
-        double **Face2Normal_v;
+        double **Elem2Normal_u;
+        double **Elem2Normal_v;
+		double** Face2Normal_u;
+		double** Face2Normal_v;
         double **massFlux_;
         double **momentumFlux_x;
         double **momentumFlux_y;
         double **energyFlux_;
+        double **Face2Area;
 
         double **density_; 
         double **pressure_;
@@ -153,6 +160,7 @@ class mesh
         double **conservative2_;
         double **conservative3_; 
         double **conservative4_;
+
 
         double **Elem_flux;
 
@@ -178,6 +186,8 @@ class mesh
         double Get_LocalMach(int Face_number,string choix);
         void saveConservative();
         void savePrimitive();
+    //Euler
+        void ExpliciteTime_euler(double **dts, double **Elem2Area);        
 };
 
 class Writer

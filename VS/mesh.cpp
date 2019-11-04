@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream> 
 #include <fstream>
-#include <string>
+#include <string> 
 #include <cctype>
 #include <algorithm>
 #include "main.h"
@@ -43,9 +43,9 @@ void mesh::primitive_init(double rho_0,double P_0,double u_0,double v_0, int Nbr
         }
         else if (celltype[i] == "slipwall")
         {
-            double n_u = abs(Face2Normal_u[i][0]);
-            double n_v = abs(Face2Normal_v[i][0]);
-            int Elem_voisin = elem2elem[i][0];
+            double n_u = (Elem2Normal_u[i][0]);
+            double n_v = (Elem2Normal_v[i][0]);
+            int Elem_voisin = elem2elem[i][0]-1;
             mat[i][0] = mat[Elem_voisin][0];
             mat[i][1] = mat[Elem_voisin][1];
             mat[i][2] = mat[Elem_voisin][2] - 2*(mat[Elem_voisin][2]*n_u + mat[Elem_voisin][3]*n_v)*n_u;
@@ -131,7 +131,9 @@ void mesh::roe_compute()
 
         uRoe = (uL*sqrtRoL + uR*sqrtRoR)/(sqrtRoL + sqrtRoR);
         vRoe = (vL*sqrtRoL + vR*sqrtRoR)/(sqrtRoL + sqrtRoR);
-
+//cout << "---------------------------------------------------\n";
+//cout << "vRoe : "; cout << vRoe;
+//cout << "\n---------------------------------------------------\n";
         hRoe = (hL*sqrtRoL + hR*sqrtRoR)/(sqrtRoL + sqrtRoR);
 
         qRoe2 = uRoe*uRoe + vRoe*vRoe;
@@ -151,7 +153,7 @@ void mesh::roe_compute()
         double E_AVG = 0.5*(eR + eL);
         double uAVG = 0.5*(uL + uR); 
         double vAVG = 0.5*(vL + vR); 
-        //double V_avg = 0.5*(V_R + V_L);
+
         double V_avg = uAVG*n_u + vAVG*n_v;
         deltaV_  = V_R-V_L;
         deltaP = pR-pL;
@@ -190,43 +192,18 @@ void mesh::roe_compute()
         f33 = coef3*(vRoe + cRoe*n_v); 
         f34 = coef3*(hRoe + cRoe*V_Roe);
 
-// Là c'est vraiment le shcéma de Roe
-        ////////////////////////////
-/*
-        massFlux = uAvg*roAvg
-        momentumFlux = uAvg**2*roAvg+pAvg
-        energyFlux = uAvg*(0.5 * uAvg**2 * roAvg + pAvg/(gamma -1.0) + pAvg)
-*/
-/////////////////////////////////////////////////////
-////// HHHMMMMMMMMMMMMMMM.....  /////////////////////
-/////////////////////////////////////////////////////
-/*
-        massFlux_dob = 0.5* ( roL*V_L + roR*V_R );
-        momentumFlux_X_dob = 0.5* ( (roL*uL*V_L + n_u*pL) + (roR*uR*V_R + n_u*pR) );     //V_avg*uAvg*roAvg + n_u*pAvg;
-        momentumFlux_Y_dob = 0.5* ( (roL*vL*V_L + n_v*pL) + (roR*vR*V_R + n_v*pR) );     //V_avg*vAvg*roAvg + n_v*pAvg;
-        energyFlux_dob = 0.5* ( roL*hL*V_L + roR*hR*V_R );  //V_avg*H_avg*roAvg; //(0.5 * uAvg*uAvg * roAvg + pAvg/(Gamma -1.0) + pAvg);
-*/
         massFlux_dob = roAvg*V_avg;
         momentumFlux_X_dob = roAvg*uAVG*V_avg + n_u*pAVG;     //V_avg*uAvg*roAvg + n_u*pAvg;
         momentumFlux_Y_dob = roAvg*vAVG*V_avg + n_v*pAVG;     //V_avg*vAvg*roAvg + n_v*pAvg;
         energyFlux_dob = roAvg*E_AVG*V_avg + V_avg*pAVG;  //V_avg*H_avg*roAvg; //(0.5 * uAvg*uAvg * roAvg + pAvg/(Gamma -1.0) + pAvg);
-/*
-        cout << "massFlux_dob : ";cout << massFlux_dob;cout<< "\n";
-        cout << "momentumFlux_X_dob : ";cout << momentumFlux_X_dob;cout<< "\n";
-        cout << "momentumFlux_Y_dob : ";cout << momentumFlux_Y_dob;cout<< "\n";
-        cout << "energyFlux_dob : ";cout << energyFlux_dob;cout<< "\n";
-*/ 
+//cout << "---------------------------------------------------\n";
+//cout << "momentumFlux_Y_dob : "; cout << momentumFlux_Y_dob;
+//cout << "\n---------------------------------------------------\n";
         massFlux_dob -= 0.5*(f11+f21+f31);
         momentumFlux_X_dob -= 0.5*(f12+f22+f32);
         momentumFlux_Y_dob -= 0.5*(f13+f23+f33);
         energyFlux_dob -= 0.5*(f14+f24+f34);
-/*
-        cout << "massFlux_dob : ";cout << massFlux_dob;cout<< "\n";
-        cout << "momentumFlux_X_dob : ";cout << momentumFlux_X_dob;cout<< "\n";
-        cout << "momentumFlux_Y_dob : ";cout << momentumFlux_Y_dob;cout<< "\n";
-        cout << "energyFlux_dob : ";cout << energyFlux_dob;cout<< "\n";
-        ////////////////////////////
-*/        
+
         massFlux_[i][0] = massFlux_dob;
         momentumFlux_x[i][0] = momentumFlux_X_dob;
         momentumFlux_y[i][0] = momentumFlux_Y_dob;
@@ -236,15 +213,14 @@ void mesh::roe_compute()
     {
         int Elem_L = face2elem[j][0] - 1;
         int Elem_R = face2elem[j][1] - 1;
-        //cout << "Elem_L : ";cout << Elem_L;cout << "\n";
-        //cout << "Elem_R : ";cout << Elem_R;cout << "\n";
+        
         double n_u = abs(Face2Normal_u[j][0]);
         double n_v = abs(Face2Normal_v[j][0]); 
         int Face_num = j;
         double face_vec_x = (Face2Normal_u[j][0]);
         double face_vec_y = (Face2Normal_v[j][0]);
-        //cout << "face_vec_x : ";cout << face_vec_x;cout << "\n";
-        //cout << "face_vec_y : ";cout << face_vec_y;cout << "\n";
+        
+        /*
         Elem_flux[Elem_L][0] += (n_u + n_v)*massFlux_[Face_num][0];
         Elem_flux[Elem_L][1] += (n_u + n_v)*momentumFlux_x[Face_num][0];
         Elem_flux[Elem_L][2] += (n_u + n_v)*momentumFlux_y[Face_num][0];
@@ -254,7 +230,17 @@ void mesh::roe_compute()
         Elem_flux[Elem_R][1] -= (n_u + n_v)*momentumFlux_x[Face_num][0];
         Elem_flux[Elem_R][2] -= (n_u + n_v)*momentumFlux_y[Face_num][0];
         Elem_flux[Elem_R][3] -= (n_u + n_v)*energyFlux_[Face_num][0];
-        //mat.printMatrix_double(Elem_flux,8, 4);
+        */
+        Elem_flux[Elem_L][0] += Face2Area[j][0]*massFlux_[Face_num][0];
+        Elem_flux[Elem_L][1] += Face2Area[j][0]*momentumFlux_x[Face_num][0];
+        Elem_flux[Elem_L][2] += Face2Area[j][0]*momentumFlux_y[Face_num][0];
+        Elem_flux[Elem_L][3] += Face2Area[j][0]*energyFlux_[Face_num][0];
+
+        Elem_flux[Elem_R][0] -= Face2Area[j][0]*massFlux_[Face_num][0];
+        Elem_flux[Elem_R][1] -= Face2Area[j][0]*momentumFlux_x[Face_num][0];
+        Elem_flux[Elem_R][2] -= Face2Area[j][0]*momentumFlux_y[Face_num][0];
+        Elem_flux[Elem_R][3] -= Face2Area[j][0]*energyFlux_[Face_num][0];
+       
     }
 
 }
@@ -301,10 +287,47 @@ void mesh::savePrimitive()
 {
     for (int i = 0; i < nelem; i++)
     {
-        density_[i][0] = conservative1_[i][0];
-        velocity_x[i][0] = conservative2_[i][0] / conservative1_[i][0];
-        velocity_y[i][0] = conservative3_[i][0] / conservative1_[i][0];
-        pressure_[i][0] = (conservative4_[i][0]/conservative1_[i][0] - 0.5*((velocity_x[i][0]*velocity_x[i][0]) + velocity_y[i][0]*velocity_y[i][0]))/density_[i][0];
+        if (celltype[i] == "center")
+        {
+            density_[i][0] = conservative1_[i][0];
+            velocity_x[i][0] = conservative2_[i][0] / conservative1_[i][0];
+            velocity_y[i][0] = conservative3_[i][0] / conservative1_[i][0];
+            pressure_[i][0] = (conservative4_[i][0]/conservative1_[i][0] - 0.5*((velocity_x[i][0]*velocity_x[i][0]) + velocity_y[i][0]*velocity_y[i][0]))*density_[i][0];
+        }
+        else if (celltype[i] == "farfield")
+        {
+            // Si supersonic
+            int Elem_voisin = elem2elem[i][0]-1;
+            density_[i][0] = 2*rho_0 - density_[Elem_voisin][0];
+            velocity_x[i][0] = 2*u_0 - velocity_x[Elem_voisin][0];
+            velocity_y[i][0] = 2*v_0 - velocity_y[Elem_voisin][0];
+            pressure_[i][0] = 2*P_0 - pressure_[Elem_voisin][0];
+            // Si subsonic
+
+        }
+        else if (celltype[i] == "slipwall")
+        {
+            double n_u = (Elem2Normal_u[i][0]);
+            double n_v = (Elem2Normal_v[i][0]);
+            int Elem_voisin = elem2elem[i][0]-1;
+            density_[i][0] = density_[Elem_voisin][0];
+            pressure_[i][0] = pressure_[Elem_voisin][0];
+            velocity_x[i][0] = velocity_x[Elem_voisin][0] - 2*(velocity_x[Elem_voisin][0]*n_u + velocity_y[Elem_voisin][0]*n_v)*n_u;
+            velocity_y[i][0] = velocity_y[Elem_voisin][0] - 2*(velocity_x[Elem_voisin][0]*n_u + velocity_y[Elem_voisin][0]*n_v)*n_v;
+        }  
     }
 }
 
+
+void mesh::ExpliciteTime_euler(double **dts, double **Elem2Area)
+{
+    for (int i = 0; i < nelem; i++) 
+    {
+        double dT_dA = dts[i][0]/Elem2Area[i][0];
+        //cout << "dT_dA : ";cout << dT_dA;cout << "\n";
+        conservative1_[i][0] = conservative1_[i][0] - Elem_flux[i][0] * dT_dA;
+        conservative2_[i][0] = conservative2_[i][0] - Elem_flux[i][1] * dT_dA;
+        conservative3_[i][0] = conservative3_[i][0] - Elem_flux[i][2] * dT_dA;
+        conservative4_[i][0] = conservative4_[i][0] - Elem_flux[i][3] * dT_dA;
+    }
+}

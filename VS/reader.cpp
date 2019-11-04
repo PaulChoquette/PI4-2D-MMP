@@ -144,27 +144,34 @@ void Reader::read_file(string File_Name)
 						celltype = new string[nelem + totalmarken];
 						inpoel1_wf = matrix.generateMatrix_unsigned(nelem + totalmarken, nnodemax);
 						vtk_wf = matrix.generateMatrix(nelem + totalmarken, 1);
-						for (int ielem = 0; ielem < nelem; ielem++) {
+						for (int ielem = 0; ielem < nelem; ielem++)
+						{
 							*(int*)vtk_wf[ielem] = *(int*)vtk[ielem];
 							celltype[ielem] = "center";
-							for (int inode = 0; inode < nnodemax; inode++) {
+							for (int inode = 0; inode < nnodemax; inode++) 
+							{
 								inpoel1_wf[ielem][inode] = inpoel1[ielem][inode];
 							}
 						}
 						int imelem = 0;
-						for (int k = 0; k < nmark; k++) {
-							for (int ifc = 0; ifc < *(int*)melemnv[k]; ifc++) {
+						for (int k = 0; k < nmark; k++) 
+						{
+							for (int ifc = 0; ifc < *(int*)melemnv[k]; ifc++) 
+							{
 								*(int*)vtk_wf[nelem + imelem] = 3;
 								string farfield = "farfield";
 								string slipwall = "slipwall";
-								if (markername[k] == "farfield") {
+								if (markername[k] == "farfield") 
+								{
 									celltype[nelem + imelem] = farfield;
 								}
-								else if (markername[k] == "airfoil") {
+								else if (markername[k] == "airfoil") 
+								{
 									celltype[nelem + imelem] = slipwall;
 								}
 								
-								for (int j = 0; j < 2; j++) {
+								for (int j = 0; j < 2; j++) 
+								{
 									inpoel1_wf[nelem + imelem][j] = markerdata[k][ifc][j];
 								}
 								imelem++;

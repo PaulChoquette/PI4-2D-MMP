@@ -19,7 +19,7 @@ class matrix
         void printMatrix_double(double ** mat, int rows, int cols) ;
         void printMatrix_unsigned(unsigned ** mat, int rows, int cols) ;
         void printXY_double(double ** matX, double ** matY, int rows, int cols);
-        void deleteMatrix(int ** mat, int rows, int cols);
+        void deleteMatrix(double ** mat, int rows, int cols);
         int ** generateMatrix(int rows, int cols);
         double ** generateMatrix_double(int rows, int cols);
         unsigned ** generateMatrix_unsigned(unsigned rows, unsigned cols);
@@ -183,7 +183,7 @@ class mesh
         void primitive_init(double rho_0,double P_0,double u_0,double v_0, int NbrPrimitive);
         void roe_compute();
 
-        double Get_LocalMach(int Face_number,string choix);
+        double Get_LocalMach(int Elem_L, int Elem_R,string choix);
         void saveConservative();
         void savePrimitive();
     //Euler

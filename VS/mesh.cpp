@@ -48,8 +48,8 @@ void mesh::primitive_init(double rho_0,double P_0,double u_0,double v_0, int Nbr
             int Elem_voisin = elem2elem[i][0]-1;
             mat[i][0] = mat[Elem_voisin][0];
             mat[i][1] = mat[Elem_voisin][1];
-            mat[i][2] = mat[Elem_voisin][2] - 2*(mat[Elem_voisin][2]*n_u + mat[Elem_voisin][3]*n_v)*n_u;
-            mat[i][3] = mat[Elem_voisin][3] - 2*(mat[Elem_voisin][2]*n_u + mat[Elem_voisin][3]*n_v)*n_v;
+            mat[i][2] = mat[Elem_voisin][2] - 2.0*(mat[Elem_voisin][2]*n_u + mat[Elem_voisin][3]*n_v)*n_u;
+            mat[i][3] = mat[Elem_voisin][3] - 2.0*(mat[Elem_voisin][2]*n_u + mat[Elem_voisin][3]*n_v)*n_v;
         }
         
     }
@@ -220,17 +220,6 @@ void mesh::roe_compute()
         double face_vec_x = (Face2Normal_u[j][0]);
         double face_vec_y = (Face2Normal_v[j][0]);
         
-        /*
-        Elem_flux[Elem_L][0] += (n_u + n_v)*massFlux_[Face_num][0];
-        Elem_flux[Elem_L][1] += (n_u + n_v)*momentumFlux_x[Face_num][0];
-        Elem_flux[Elem_L][2] += (n_u + n_v)*momentumFlux_y[Face_num][0];
-        Elem_flux[Elem_L][3] += (n_u + n_v)*energyFlux_[Face_num][0];
-
-        Elem_flux[Elem_R][0] -= (n_u + n_v)*massFlux_[Face_num][0];
-        Elem_flux[Elem_R][1] -= (n_u + n_v)*momentumFlux_x[Face_num][0];
-        Elem_flux[Elem_R][2] -= (n_u + n_v)*momentumFlux_y[Face_num][0];
-        Elem_flux[Elem_R][3] -= (n_u + n_v)*energyFlux_[Face_num][0];
-        */
         Elem_flux[Elem_L][0] += Face2Area[j][0]*massFlux_[Face_num][0];
         Elem_flux[Elem_L][1] += Face2Area[j][0]*momentumFlux_x[Face_num][0];
         Elem_flux[Elem_L][2] += Face2Area[j][0]*momentumFlux_y[Face_num][0];
@@ -245,31 +234,19 @@ void mesh::roe_compute()
 
 }
 
-double mesh::Get_LocalMach(int Face_number,string choix)
+double mesh::Get_LocalMach(int Elem_L,int Elem_R,string choix)
 {
     matrix mat;
 
     double const Gamma = 1.4;
-    int Elem_L = face2elem[Face_number][0] - 1;
-    int Elem_R = face2elem[Face_number][1] - 1;
-    double **density_ = mat.generateMatrix_double(nelem, 1); 
-    double **pressure_ = mat.generateMatrix_double(nelem, 1);
-    double **velocity_x = mat.generateMatrix_double(nelem, 1); 
-    double **velocity_y = mat.generateMatrix_double(nelem, 1);  
-    for (int i=0;i<nelem;i++)
-    {
-        density_[i][0] = primitive_0[i][0];
-        pressure_[i][0] = primitive_0[i][1];
-        velocity_x[i][0] = primitive_0[i][2];
-        velocity_y[i][0] = primitive_0[i][3];
-    }
+    
     double roL = density_[Elem_L][0];
     double roR = density_[Elem_R][0];
     double pL = pressure_[Elem_L][0];
     double pR = pressure_[Elem_R][0];
     double a_speed = sqrt(Gamma*(pL+pR)/(roL+roR));
     
-    return 0;
+    return a_speed;
 }
 
 void mesh::saveConservative()
@@ -296,14 +273,57 @@ void mesh::savePrimitive()
         }
         else if (celltype[i] == "farfield")
         {
-            // Si supersonic
-            int Elem_voisin = elem2elem[i][0]-1;
-            density_[i][0] = 2*rho_0 - density_[Elem_voisin][0];
-            velocity_x[i][0] = 2*u_0 - velocity_x[Elem_voisin][0];
-            velocity_y[i][0] = 2*v_0 - velocity_y[Elem_voisin][0];
-            pressure_[i][0] = 2*P_0 - pressure_[Elem_voisin][0];
-            // Si subsonic
 
+            double n_u = (Elem2Normal_u[i][0]);
+            double n_v = (Elem2Normal_v[i][0]);
+            int Elem_voisin = elem2elem[i][0]-1;
+			double v_dot_n = velocity_x[i][0] * n_u + velocity_y[i][0] * n_v;
+			double MN = abs(v_dot_n / Get_LocalMach(i, Elem_voisin, "lmao"));
+			double rho_bc = 0.;
+			double velocity_x_BC = 0.;
+			double velocity_y_BC = 0.;
+			double pressure_BC = 0.;
+			
+			if (MN > 1) {
+
+				if (v_dot_n < 0.)
+				{
+					rho_bc = rho_0;
+					velocity_x_BC = u_0;
+					velocity_y_BC = v_0;
+					pressure_BC = P_0;
+
+				}
+				else
+				{
+					rho_bc = density_[Elem_voisin][0];
+					velocity_x_BC = velocity_x[Elem_voisin][0];
+					velocity_y_BC = velocity_y[Elem_voisin][0];
+					pressure_BC = pressure_[Elem_voisin][0];
+				}
+
+			}
+			else {
+				double c_0 = Get_LocalMach(i, Elem_voisin, "lmao");
+				if (v_dot_n < 0.)
+				{
+					pressure_BC =0.5 * (P_0+pressure_[Elem_voisin][0]-rho_0*c_0*(n_u*(u_0- velocity_x[Elem_voisin][0])+n_v * (v_0 - velocity_y[Elem_voisin][0])));
+					rho_bc = rho_0 + (pressure_BC-P_0)/(c_0*c_0);
+					velocity_x_BC = u_0-n_u* (P_0-pressure_BC) / (rho_0 * c_0);
+					velocity_y_BC = v_0 - n_v * (P_0 - pressure_BC) / (rho_0 * c_0);
+				}
+				else
+				{
+					pressure_BC = P_0;
+					rho_bc = rho_0 + (pressure_BC - pressure_[Elem_voisin][0]) / (c_0 * c_0);
+					velocity_x_BC = u_0 + n_u * (pressure_[Elem_voisin][0] - pressure_BC) / (rho_0 * c_0);
+					velocity_y_BC = v_0 + n_v * (pressure_[Elem_voisin][0] - pressure_BC) / (rho_0 * c_0);
+				}
+			}
+			density_[i][0] = 2. * rho_bc - density_[Elem_voisin][0];
+			velocity_x[i][0] = 2. * velocity_x_BC - velocity_x[Elem_voisin][0];
+			velocity_y[i][0] = 2. * velocity_y_BC - velocity_y[Elem_voisin][0];
+			pressure_[i][0] = 2. * pressure_BC - pressure_[Elem_voisin][0];
         }
         else if (celltype[i] == "slipwall")
         {
@@ -312,8 +332,8 @@ void mesh::savePrimitive()
             int Elem_voisin = elem2elem[i][0]-1;
             density_[i][0] = density_[Elem_voisin][0];
             pressure_[i][0] = pressure_[Elem_voisin][0];
-            velocity_x[i][0] = velocity_x[Elem_voisin][0] - 2*(velocity_x[Elem_voisin][0]*n_u + velocity_y[Elem_voisin][0]*n_v)*n_u;
-            velocity_y[i][0] = velocity_y[Elem_voisin][0] - 2*(velocity_x[Elem_voisin][0]*n_u + velocity_y[Elem_voisin][0]*n_v)*n_v;
+            velocity_x[i][0] = velocity_x[Elem_voisin][0] - 2.0*(velocity_x[Elem_voisin][0]*n_u + velocity_y[Elem_voisin][0]*n_v)*n_u;
+            velocity_y[i][0] = velocity_y[Elem_voisin][0] - 2.0*(velocity_x[Elem_voisin][0]*n_u + velocity_y[Elem_voisin][0]*n_v)*n_v;
         }  
     }
 }

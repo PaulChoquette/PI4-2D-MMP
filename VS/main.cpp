@@ -26,8 +26,8 @@ int main()
 		FileContents.read_file(File_Name);
 		FileContents.file.close();
 	}
-	matrix.printMatrix_unsigned(FileContents.inpoel1_wf,FileContents.nelem+FileContents.totalmarken,FileContents.nnodemax);
-	matrix.printMatrix_double(FileContents.coord,FileContents.npoin,FileContents.ndime);
+	//matrix.printMatrix_unsigned(FileContents.inpoel1_wf,FileContents.nelem+FileContents.totalmarken,FileContents.nnodemax);
+	//matrix.printMatrix_double(FileContents.coord,FileContents.npoin,FileContents.ndime);
 
 	
 //////////////////////-------------------------------------------------------------------------//////////////////////
@@ -77,7 +77,7 @@ int main()
 	mesh_.celltype = FileContents.celltype;
     mesh_.rho_0 = 1.0;
     mesh_.P_0 = 1.0;
-    mesh_.u_0 = 1.5*sqrt(1.4);
+    mesh_.u_0 = 0.5*sqrt(1.4);
     mesh_.v_0 = 0.0;
     cout << " --- Elem2Area --- ";cout << "\n";
     matrix.printMatrix_double(Elem2Area,mesh_.nelem,1);
@@ -87,7 +87,7 @@ cout << "-----------------------------------------------------------------------
 cout << "----------------------------------        DEBUT RESOLUTION        -------------------------------------------------\n";
 cout << "-------------------------------------------------------------------------------------------------------------------\n";
 cout << "-------------------------------------------------------------------------------------------------------------------\n";
-    double cfl = 0.6;
+    double cfl = 0.9;
     double somme_sX, somme_sY, lam_x, lam_y;
     int nfael;
     long double dt;
@@ -97,7 +97,9 @@ cout << "-----------------------------------------------------------------------
     double Critere = 1;
     int it = 1;
     //while (Critere > 0.00000000001)
-    while (it < 3)
+	double** soundSpeed = matrix.generateMatrix_double(mesh_.nelem, 1);
+	double** dts = matrix.generateMatrix_double(mesh_.nelem, 1);
+    while (it < 1000)
     {
         cout << "-------------------------------------------------------------------------------------------------------------------\n";
         cout << "-------------------------------------------------------------------------------------------------------------------\n";
@@ -109,8 +111,6 @@ cout << "-----------------------------------------------------------------------
         mesh_.saveConservative();
         mesh_.roe_compute();
     //////////////////////-------------------------------------------------------------------------//////////////////////
-        double **soundSpeed = matrix.generateMatrix_double(mesh_.nelem,1);
-        double **dts = matrix.generateMatrix_double(mesh_.nelem,1);
         for (int k = 0; k < mesh_.nelem_REAL; ++k) // 0 to 8
         {
             nfael = maillage.Get_nfael(maillage.vtk,k);
@@ -132,21 +132,23 @@ cout << "-----------------------------------------------------------------------
 
 
             dts[k][0] = cfl * Elem2Area[k][0] / (lam_x + lam_y);
-            cout << dts[k][0];cout << "\n";
+            //cout << dts[k][0];cout << "\n";
         }
     //////////////////////-------------------------------------------------------------------------//////////////////////
         mesh_.ExpliciteTime_euler(dts, Elem2Area);
         mesh_.savePrimitive();
-            cout << " --- Elem_flux --- ";cout << "\n";
-            matrix.printMatrix_double(mesh_.Elem_flux,mesh_.nelem, 4);
-            cout << " --- density_ --- ";cout << "\n";
-            matrix.printMatrix_double(mesh_.density_,mesh_.nelem, 1);
-            cout << " --- velocity_x --- ";cout << "\n";
-            matrix.printMatrix_double(mesh_.velocity_x,mesh_.nelem, 1);
-            cout << " --- velocity_y --- ";cout << "\n";
-            matrix.printMatrix_double(mesh_.velocity_y,mesh_.nelem, 1);
-            cout << " --- pressure_ --- ";cout << "\n";
-            matrix.printMatrix_double(mesh_.pressure_,mesh_.nelem, 1);
+		/*
+        cout << " --- Elem_flux --- ";cout << "\n";
+        matrix.printMatrix_double(mesh_.Elem_flux,mesh_.nelem, 4);
+        cout << " --- density_ --- ";cout << "\n";
+        matrix.printMatrix_double(mesh_.density_,mesh_.nelem, 1);
+        cout << " --- velocity_x --- ";cout << "\n";
+        matrix.printMatrix_double(mesh_.velocity_x,mesh_.nelem, 1);
+        cout << " --- velocity_y --- ";cout << "\n";
+        matrix.printMatrix_double(mesh_.velocity_y,mesh_.nelem, 1);
+        cout << " --- pressure_ --- ";cout << "\n";
+        matrix.printMatrix_double(mesh_.pressure_,mesh_.nelem, 1);
+		*/
     //////////////////////-------------------------------------------------------------------------//////////////////////
         Critere = mesh_.Elem_flux[0][0]/mesh_.density_[0][0];
         for (int i=1; i<mesh_.nelem_REAL; i++)
@@ -159,6 +161,11 @@ cout << "-----------------------------------------------------------------------
         cout << " ------------------------------------------------------------------";cout << "\n";
         cout << "Critere : ";cout << Critere;cout << "\n";
         cout << " ------------------------------------------------------------------";cout << "\n";
+		matrix.deleteMatrix(mesh_.Elem_flux, mesh_.nelem, 4);
+		matrix.deleteMatrix(mesh_.massFlux_, mesh_.nbFace, 1);
+		matrix.deleteMatrix(mesh_.momentumFlux_x, mesh_.nbFace, 1);
+		matrix.deleteMatrix(mesh_.momentumFlux_y, mesh_.nbFace, 1);
+		matrix.deleteMatrix(mesh_.energyFlux_, mesh_.nbFace, 1);
     }
     
 	double** vararr = matrix.generateMatrix_double(mesh_.nelem_REAL,4);

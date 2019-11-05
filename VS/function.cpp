@@ -43,7 +43,7 @@ void matrix::printMatrix_unsigned(unsigned** mat, int rows, int cols)
 	}
 }
 
-void matrix::deleteMatrix(int ** mat, int rows, int cols) {
+void matrix::deleteMatrix(double ** mat, int rows, int cols) {
     //delete rows
     for (int i = 0; i < rows; ++i) {
         delete[] mat[i];
